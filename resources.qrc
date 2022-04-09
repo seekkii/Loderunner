@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>map.jpg</file>
+        <file>stairkek.png</file>
+        <file>yourchar.png</file>
+        <file>string.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>form.ui</file>
+    </qresource>
+</RCC>
