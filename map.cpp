@@ -9,7 +9,7 @@ ground::ground(float x, float y)
     ground_img = pixmap;
     type = "br";
 
-    QSize size(40,40);
+    QSize size(30,30);
     this->size = size;
     this->x = x;
     this->y = y;
@@ -83,7 +83,7 @@ bool ground::isStair()
 //map
 map::map()
 {
-    you.set_pos(40,40);
+
     current_lv = 1;
     current_map = board[current_lv];
 }
@@ -93,20 +93,14 @@ QVector<QVector<ground>> map::get_map(int lv)
    return board[lv];
 }
 
-QSize map::get_block_size()
+int map::get_width()
 {
-    QSize size(block_Height,block_Width);
-    return size;
-}
-
-int map::get_row()
-{
-    return Width/block_Width;
+    return block_Width;
 }// return the corresponding ratio between position on board and on screen of the width
 
-int map::get_col()
+int map::get_height()
 {
-    return Width/block_Width;
+    return block_Width;
 }// return the corresponding ratio between position on board and on screen of the height
 
 
@@ -128,7 +122,7 @@ void map::setup_map()
 {"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
 {"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","br","br","br","st","st","br","br","  ","br"},
 {"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","st","st","  ","  ","br"},
-{"br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","  ","  ","  ","st","st","  ","  ","br"},
+{"br","br","br","br","br","br","br","br","st","br","br","br","br","br","br","br","  ","  ","  ","st","st","  ","  ","br"},
 {"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","br","st","  ","  ","br"},
 {"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","br","st","  ","  ","br"},
 {"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","br","br","st","  ","  ","br"},
@@ -150,7 +144,7 @@ void map::setup_map()
 
 void map::setup_from_readablemap(QVector<QVector<QString>> map, int lv)
 {
-    current_map.resize(this->get_row(), QVector<ground>(this->get_col()));
+    current_map.resize(Width/get_width(), QVector<ground>(Height/get_height()));
 
     for (int i = 0; i < map.size(); i ++){
          for (int j = 0; j < map.size(); j ++){
@@ -176,28 +170,8 @@ void map::setup_from_readablemap(QVector<QVector<QString>> map, int lv)
 }
 
 
-bool map::falling()
-{
-    float x = you.x();
-    float y = you.y();
-
-    int i = trunc(x*get_row()/Width);
-    int j = trunc(y * get_col()/Height);
 
 
-
-    if(!current_map[i][j+1].isGround()){
-            return true;
-    }
-    else{
-
-            return false;
-        }
-
-
-
-
-}//
 
 
 

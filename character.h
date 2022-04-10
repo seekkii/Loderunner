@@ -3,25 +3,34 @@
 
 #include <QPixmap>
 #include <QLabel>
+#include <QTimer>
+#include <map.h>
 
 class Character
 {
 public:
-    Character();
-    float x() const;
-    float y() const;
-    int get_walkstepdis();
-    int row();
-    int col();
-    void set_pos(float x, float y);
-    QPixmap getpixmap();
-    QSize getSize();
-    void setSize(int h, int w);
+    friend class ground;
+    Character();// constructor
 
-    bool is_object(float x, float y);
+    float x() const;// return x cordinate
+    float y() const;//return y cordinate
+    int row();//return corresponding row to x
+    int col();//return corresponding col to y
+    bool on_map();//check if character position is on map
+    int get_walkstepdis();// walk distance of character
+
+    void set_pos(float x, float y);//set current pos to (x,y)
+    QPixmap getpixmap();//get pix map of character
+    QSize getSize();//get size of pixmap/your char
+    void setSize(int h, int w);//set size of~
+    QTimer* get_timer();//get timer of character
+
+
+
 
 
 protected slots:
+
 
 
 protected:
@@ -33,6 +42,7 @@ protected:
     QPixmap char_img;
     QSize size;
 
+    QTimer *timer;
 
 };
 

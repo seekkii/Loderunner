@@ -1,6 +1,6 @@
 #include "ui.h"
 #include <QKeyEvent>
-#include <QSignalMapper>
+
 
 ui::ui(QWidget *parent)
     : QWidget(parent)
@@ -11,12 +11,11 @@ ui::ui(QWidget *parent)
     QWidget *formWidget = loader.load(&file, this);
     file.close();
 
-    gamemap = new map();//current map
+    gamemap = new map();//make new map
 
 
-    //mobs
+
     mob.resize(3);
-
     for (int i = 0; i < mob.size(); i++)
     {
          mobs new_mob;
@@ -24,13 +23,11 @@ ui::ui(QWidget *parent)
 
     }// generate new vector of mobs
 
-    you = new Character;
-    you->set_pos(40,40);
 
-    row = gamemap->get_row();
-    col = gamemap->get_col();
+    you.set_pos(100,100); //set initial pos of your char
+
     gamemap->setup_map();
-    cur_map = gamemap->get_map(1);
+    cur_map = gamemap->get_map(1);//setup map lv 1
 
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -41,30 +38,28 @@ ui::ui(QWidget *parent)
 
 
     setLayout(layout);
-    QMetaObject::connectSlotsByName(this);
+
+    connect(you.get_timer(),  &QTimer::timeout, this, [this]{ fall(you); });
+    if (falling(you)){
+            you.get_timer()->start(100);
+    }//connect your char timer to fall() slot for fall animation
+
+    for (int i = 0 ; i < mob.size(); i++){
+        if (!mob[i].on_map())
+        {
+            mob[i].set_pos(100,100);
+            qDebug()<< mob[i].x() << mob[i].y();
+        }
+        connect(mob[i].get_rand_timer(),  &QTimer::timeout, this, [i,this]{ mobs_go_around(mob[i]); });
+        connect(mob[i].get_timer(),  &QTimer::timeout, this, [i,this]{ mobfall(mob[i]); });
+
+        if (falling(mob[i])){
+                mob[i].get_timer()->start(100);
+        }
+        mob[i].get_rand_timer()->start(200);
+    }//connect mobs timer to fall() slot for fall animation
 
 
-
-
-
-    timer = new QTimer(this);
-    connect(timer,  &QTimer::timeout, this, [this]{ fall(you->x(),you->y()); });
-    if (falling(you->x(),you->y())){
-            timer->start(100);
-    }
-
-    mob_timer.resize(mob.size());
-
-    for (int i = 0; i < mob.size();i++)
-    {
-        float x_mob = mob[i].x();
-        float y_mob = mob[i].y();
-
-
-        mob_timer[i] = new QTimer(this);
-        connect(mob_timer[i],  &QTimer::timeout, this, [this]{ mobs_go_around(); });
-
-    }
 
 
     update();
@@ -76,33 +71,37 @@ ui::ui(QWidget *parent)
 void ui::paintEvent(QPaintEvent *)
 {
  QPainter painter(this);
+ if (lose_case())
+ {
+ }
 
 
-
- for (int i =0; i < row ;i++)
-     for (int j =0; j < col;j++)
+ for (int i =0; i < gamemap->get_map(1).size() ;i++)
+     for (int j =0; j < gamemap->get_map(1).size();j++)
      {
-         float h = i*cur_map[i][j].get_size().width();
-         float w = j*cur_map[i][j].get_size().height();
+         float w = i*cur_map[i][j].get_size().width();
+         float h = j*cur_map[i][j].get_size().height();
          QSize size_block = cur_map[i][j].get_size();
-         auto r = QRect{QPoint(h,w),size_block};
+         auto r = QRect{QPoint(w,h),size_block};
          if (cur_map[i][j].get_type() == "ro"){
              QPen pen(Qt::white, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
              painter.setPen(pen);
              painter.setBrush(Qt::white);
-             painter.drawLine(h+40,w-20,h,w-20);
+
+             int width = gamemap->get_width();
+             painter.drawLine(w+width,h-width/2,w,h-width/2);
 
          }
          else
              painter.drawPixmap(r,cur_map[i][j].getpixmap());
-     }
+     }//print map
 
- you->setSize(40,26);
- QSize char_size = you->getSize();
- float x = you->x();
- float y = you->y();
- auto r = QRect{QPoint(x,y), char_size};
- QPixmap you_img = you->getpixmap();
+ you.setSize(30,20);//set your character's size
+ QSize char_size = you.getSize();//get your character's size
+ float x = you.x();//get your character's x cordinate
+ float y = you.y();//get your character's y cordinate
+ auto r = QRect{QPoint(x,y), char_size};//rectangle that has center of your char to print pixmap from
+ QPixmap you_img = you.getpixmap();//get pixmap of your char
  painter.setPen(Qt::blue);
  painter.setBrush(Qt::blue);
  painter.drawRect(r);
@@ -116,26 +115,22 @@ void ui::paintEvent(QPaintEvent *)
  }
 
 
- if (falling(x,y))
+ if (falling(you)){
+     you.get_timer()->start(100);
+
+ }
+ else
+     you.get_timer()->stop(); //if your char falling check is true start timer to call fall slot
+
+ for (int i = 0; i < mob.size(); i++)
+ if (falling(mob[i]))
  {
-     timer->start(200);
+     mob[i].get_timer()->start(100);
 
- }
- else timer->stop();
-
-
- for (int i = 0; i < mob.size(); i++){
-     float x_mob = mob[i].x();
-     float y_mob = mob[i].y();
-
-     {
-
-         mob_timer[i]->start(200);
-     }
+ } else mob[i].get_timer()->stop();//if mob falling check is true start timer to call fall slot
 
 
 
- }
 
 
 
@@ -144,56 +139,54 @@ void ui::paintEvent(QPaintEvent *)
 }
 
 
-bool ui::on_map(int i, int j)
+void ui::fall(Character &cha)
 {
-   if (i>row||j>row||i<0||j<0){
-       return false;
-
-   }
-   else
-       return true;
-}
-
-
-
-void ui::fall(float x, float y)
-{
+    float x = cha.x();
+    float y = cha.y();
     const int fall_per_milisec = 50;
-
-    int j = trunc(y * col/Height);
-
-
-
-
-
-
-    if (y+fall_per_milisec < gamemap->get_block_size().height()*(j+1) )
+    int j = trunc(y /gamemap->get_height());
+    if (y+fall_per_milisec < gamemap->get_height()*(j+1) )
         {
-            old_pos.setX(x);
-            old_pos.setY(y);
-            you->set_pos(x,y+fall_per_milisec);
+            cha.set_pos(x,y+fall_per_milisec);
         }
     else{
-        old_pos.setX(x);
-        old_pos.setY(y);
-        you->set_pos(x,gamemap->get_block_size().height()*(j+1));
+
+        cha.set_pos(x,gamemap->get_height()*(j+1));
     }
 
-
-
-
-
     update();
-}
+}// reduce cha 's y cordinate by fall_per_milisec
 
-bool ui::falling(float x, float y)
+
+void ui::mobfall(mobs &mob)
+{
+    float x = mob.x();
+    float y = mob.y();
+    const int fall_per_milisec = 50;
+    int j = trunc(y /gamemap->get_height());
+    if (y+fall_per_milisec < gamemap->get_height()*(j+1) )
+        {
+            mob.set_pos(x,y+fall_per_milisec);
+        }
+    else{
+
+        mob.set_pos(x,gamemap->get_height()*(j+1));
+    }
+    update();
+}// reduce mob's y cordinate by fall_per_milisec
+
+
+bool ui::falling(Character &cha)
 {
 
-    int i = round(x*row/Width);
-    int j = trunc(y * col/Height);
-    qDebug()<<j<<j;
+    int i = round(cha.x()/gamemap->get_width());
+    int j = trunc(cha.y()/gamemap->get_height());
 
 
+    if (!cha.on_map())
+    {
+        return true;
+    }
     if(!cur_map[i][j+1].isGround()){
             return true;
     }
@@ -201,43 +194,36 @@ bool ui::falling(float x, float y)
 
             return false;
         }
-
-
-
-
-}//
+}//if cha is not on map, falling is definitely true. Check if [i][i+1] is ground, return true if so and false otherwise
 
 
 
 void ui::keyPressEvent(QKeyEvent *event)
 {
-    int dis = you->get_walkstepdis();
-    float x = you->x();
-    float y = you->y();
+    int dis = you.get_walkstepdis();
+    float x = you.x();
+    float y = you.y();
 
-if(!falling(x,y))
+if(!falling(you))
     {
-       old_pos.setX(x);
-       old_pos.setY(y);
-
         if(event->key() == Qt::Key_Up)
         {
             if(!is_object(x,y-dis))
-            you->set_pos(x,y-dis);
+            you.set_pos(x,y-dis);
 
         }
 
         if(event->key() == Qt::Key_Down)
         {
           if(!is_object(x,y+dis))
-             you->set_pos(x,y+dis);
+             you.set_pos(x,y+dis);
 
         }
 
         if(event->key() == Qt::Key_Right)
         {
             if(!is_object(x+dis,y))
-                you->set_pos(x+dis,y);
+                you.set_pos(x+dis,y);
         }
 
 
@@ -245,21 +231,19 @@ if(!falling(x,y))
         {
             if(!is_object(x-dis,y))
 
-                you->set_pos(x-dis,y);
+                you.set_pos(x-dis,y);
 
         }
         update();
     }
 
-
-
-}
+}//override keyevent to change your character cordinates on a specific button
 
 bool ui::is_object(float x, float y)
 {
 
-    int i = trunc(x*row/Width);
-    int j = ceil(y*col/Height);
+    int i = round(x/gamemap->get_width());
+    int j = round(y/gamemap->get_height());
 
         if(cur_map[i][j].get_type() == "br"){
             return true;
@@ -268,7 +252,7 @@ bool ui::is_object(float x, float y)
             return false;
         }
 
-}
+}//check if position i,j is of type br(brick), return true if it is and false in other cases("ro"(rope),"st"(stair))
 
 void ui::mob_action(mobs &mob)
 {
@@ -278,6 +262,9 @@ void ui::mob_action(mobs &mob)
     int dis = mob.get_walkstepdis();
 
     int selection = QRandomGenerator::global()->bounded(0,4);
+if(!falling(mob))
+{
+
     if(selection == 0)
     {
         if(!is_object(x,y-dis))
@@ -305,21 +292,31 @@ void ui::mob_action(mobs &mob)
             mob.set_pos(x-dis,y);
 
     }
-    update();
 
 }
 
-void ui::mobs_go_around()
+
+
+    update();
+
+}//mob_action() randomly chooses a number between 0 and 4,on each number choosen ,mobs will perform a different action according to how their's cordinates are changed
+
+void ui::mobs_go_around(mobs &mob)
 {
-
-    for (int i = 0 ; i < mob.size(); i++)
-    {
-        mob_action(mob[i]);
-    }
+    mob_action(mob);
     update();
+}//slot that basically perform mob_action() for corresponding mob
 
-}
 
+bool ui::lose_case()
+{
+    qDebug()<<you.row()<< you.col();
+        if (you.row()==3 && you.col()==4)
+        {
+            return true;
+        }
+        else return false;
+}//case of losing
 
 
 

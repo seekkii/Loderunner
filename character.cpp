@@ -2,14 +2,17 @@
 
 Character::Character()
 {
-    QPixmap pixmap(":/images/yourchar.png");
-    char_img = pixmap;
-    QSize s(50,50);
-    size = s;
+
+    char_img = QPixmap(":/images/yourchar.png");
+    size = QSize(50,50);
     step = 20;
     x_cor = 0;
     y_cor = 0;
+    timer = new QTimer();
 }
+
+
+
 
 float Character::x() const
 {
@@ -58,6 +61,28 @@ int Character::col()
 {
     return(y_cor/size.height());
 }
+
+QTimer* Character::get_timer()
+{
+    return timer;
+}
+
+bool Character::on_map()
+{
+    if (row()<0 || col()<0||row()>50 || col()>50)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+
+
+
 
 
 

@@ -4,7 +4,6 @@
 
 #include <QPixmap>
 #include <QLabel>
-#include <character.h>
 const int Height = 1000;
 const int Width = 1000;
 
@@ -13,23 +12,23 @@ const int Width = 1000;
 class ground
 {
 public:
-    ground();
-    ground(float x, float y);
+    ground();//constructor
+    ground(float x, float y);//parameter constructor
 
-    void set_ground_pos(float x, float y);
-    QPointF get_ground_pos() const;
+    void set_ground_pos(float x, float y);//set postion of ground
+    QPointF get_ground_pos() const;//get position
 
-    void setpixmap(QPixmap pm);
-    QPixmap getpixmap() const;
+    void setpixmap(QPixmap pm);//set pixmap of ground
+    QPixmap getpixmap() const;//get pixmap
 
-    void set_size(float h, float w);
-    QSize get_size();
+    void set_size(float h, float w);//set size of pixmap
+    QSize get_size();//get size
 
-    void set_type(QString type);
-    QString get_type();
+    void set_type(QString type);//type of ground diffrentiate by qstring
+    QString get_type();//get type
 
-    bool isGround();
-    bool isStair();
+    bool isGround();//check if ground is of type ground
+    bool isStair();//check if stair is of type stair
 
 
 protected:
@@ -47,11 +46,11 @@ class stair :public ground
     {
         QPixmap pixmap(":/images/stairkek.png");
         ground_img = pixmap;
-        size.setHeight(40);
-        size.setWidth(40);
+        size.setHeight(30);
+        size.setWidth(30);
         type = "st";
     }
-};
+};//stair is child class of ground with different type "st"
 
 class rope :public ground
 {
@@ -60,11 +59,9 @@ class rope :public ground
     {
         QPixmap pixmap(":/images/string.png");
         ground_img = pixmap;
-        size.setHeight(40);
-        size.setWidth(40);
         type = "ro";
     }
-};
+};//rope is child class of ground with different type "ro"
 
 
 
@@ -73,25 +70,26 @@ class map
 {
     public:
         map();
-        int get_row();
-        int get_col();
+        int get_height();
+        int get_width();
         QVector<QVector<ground>> get_map(int lv);
        void setup_map();
 
         void setup_from_readablemap(QVector<QVector<QString>> map, int lv);
-        QSize get_block_size();
         bool falling();
     protected slots:
         void fall();
     private:
-        Character you;
-        QMap<int,QVector<QVector<ground>>> board;
-        const int block_Height = 40;
-        const int block_Width = 40;
+
         QVector<QVector<ground>> current_map;
+
+        QMap<int,QVector<QVector<ground>>> board;
+        const int block_Height = 30;
+        const int block_Width = 30;
+
         int current_lv;
 
 
-};
+};// map combines of grounds
 
 #endif // MAP_H

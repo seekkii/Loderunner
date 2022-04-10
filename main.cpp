@@ -19,5 +19,7 @@ int main(int argc, char *argv[])
     w.setMinimumSize(1000,1000);
     w.show();
 
+
+
     return app.exec();
 }

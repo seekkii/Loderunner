@@ -10,7 +10,7 @@
 #include <QDebug>
 #include <QRandomGenerator>
 #include <QFile>
-#include <map.h>
+#include <character.h>
 #include <mobs.h>
 
 class ui:public QWidget
@@ -22,44 +22,35 @@ public:
 
         explicit ui(QWidget *parent = nullptr);// constructor
         void paintEvent(QPaintEvent *) override;// paintevent to draw gui
-        bool on_map(int i, int j);
-        bool falling(float x, float y);
-        bool is_object(float x, float y);
-        QVector<QVector<QString>> print_readable_board();
+
+        bool falling(Character &cha);//check if an object is falling
+        bool is_object(float x, float y);//check if x,y is occupied by another object from map
 
         void mob_action(mobs& mob);
+        bool lose_case();
 
 public slots:
 
-       void fall(float x, float y);
-       void mobs_go_around();
+       void fall(Character &cha);
+       void mobfall(mobs &mob);
+       void mobs_go_around(mobs &mob);
 
 private:
-       Character *you;
+       Character you;
        QVector<mobs> mob;
        map *gamemap;
        QVector<QVector<ground>> cur_map;
-       QTimer *timer;
-       QVector<QTimer*> mob_timer;
+
 
        QMap<int, bool> keys;
 
 
-       int row;
-       int col;
        QPointF old_pos;
 
 
 
 protected:
      void keyPressEvent(QKeyEvent *event) override;
-
-
-
-
-
-
-
 
 
 

@@ -6,13 +6,18 @@
 class mobs :public Character
 {
     public:
+    QTimer *rand_timer;
     mobs():Character()
     {
-        x_cor = QRandomGenerator::global()->bounded(0,1000);
-        y_cor = QRandomGenerator::global()->bounded(0,1000);
+        x_cor = QRandomGenerator::global()->bounded(50,500);
+        y_cor = QRandomGenerator::global()->bounded(50,500);
         QPixmap pixmap(":/images/yourchar.png");
-
+        rand_timer = new QTimer();
     }
+
+
+    QTimer* get_rand_timer();
+
 };
 
 #endif // MOBS_H
