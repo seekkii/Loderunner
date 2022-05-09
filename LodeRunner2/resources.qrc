@@ -1,10 +1,11 @@
 <RCC>
     <qresource prefix="/images">
-        <file>blue.jpg</file>
         <file>map.jpg</file>
         <file>stairkek.png</file>
-    </qresource>
-    <qresource prefix="/">
-        <file>form.ui</file>
+        <file>yourchar.png</file>
+        <file>string.png</file>
+        <file>fake_ground.png</file>
+        <file>background.jpg</file>
+        <file>start_background.jpg</file>
     </qresource>
 </RCC>

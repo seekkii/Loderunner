@@ -7,7 +7,9 @@ ground::ground(float x, float y)
 {
     QPixmap pixmap(":/images/map.jpg");
     ground_img = pixmap;
-    QSize size(40,40);
+    type = "br";
+
+    QSize size(30,30);
     this->size = size;
     this->x = x;
     this->y = y;
@@ -57,10 +59,23 @@ QSize ground::get_size()
 {
     return size;
 }
+
+void ground::set_type(QString type)
+{
+   this->type = type;
+}
+
+QString ground::get_type()
+{
+   return type;
+}
+
+
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 //map
 map::map()
 {
+
     current_lv = 1;
     current_map = board[current_lv];
 }
@@ -70,63 +85,126 @@ QVector<QVector<ground>> map::get_map(int lv)
    return board[lv];
 }
 
-QSize map::get_block_size()
+int map::get_width()
 {
-    QSize size(block_Height,block_Width);
-    return size;
-}
-
-int map::ratio_between_width()
-{
-    return Width/block_Width;
+    return block_Width;
 }// return the corresponding ratio between position on board and on screen of the width
 
-int map::ratio_between_height()
+int map::get_height()
 {
-    return Width/block_Width;
+    return block_Width;
 }// return the corresponding ratio between position on board and on screen of the height
-
-void map::setup_brick(int i, int j)
-{
-    ground brick(block_Width*i,block_Height*j);
-   current_map[i][j] = brick;
-}
-
-void map::setup_stair(int i, int j)
-{
-    stair stair(block_Width*i,block_Height*j);
-    current_map[i][j] = stair;
-}
-
 
 
 
 void map::setup_map()
 {
-    current_map.resize(Width/block_Width, QVector<ground>(Height/block_Height));
-    for (int i = 0;i < 10; i++)
-    {
-         for (int j = 0;j < 10; j++)
-         {
-             setup_brick(i,j+i);
+     QVector<QVector<QString>> map_1{
+{"  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  "},
+{"br","br","br","br","br","br","br","br","br","br","br","st","br","br","br","br","br","br","br","br","br","br","br","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","br","br","br","br","fg","br","br","br","br","br","st","  ","  ","br","br","br","br","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","fg"},
+{"br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","st","br","br","br","br","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","ro","ro","ro","ro","ro","ro","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","br","br","br","st","st","br","br","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","st","st","  ","  ","br"},
+{"br","br","br","br","br","br","br","br","st","br","br","br","br","br","br","br","  ","  ","  ","st","st","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","br","st","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","br","st","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","br","br","st","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","br","st","br","br","br","br","br","br","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br"},
+      };
 
+
+    QVector<QVector<QString>> map_2{
+{"  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  "},
+{"br","br","br","br","br","br","br","br","br","br","br","st","br","br","br","br","br","br","br","br","br","br","br","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","br","br","br","br","fg","br","br","br","br","br","st","ro","ro","ro","ro","ro","ro","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","fg"},
+{"  ","  ","  ","br","br","br","br","br","br","br","br","br","br","br","br","br","fg","br","st","br","br","br","br","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","ro","ro","ro","ro","ro","ro","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","br","br","br","st","fg","st","br","  ","br"},
+{"br","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","fg","st","  ","  ","br"},
+{"br","br","br","br","fg","br","br","br","st","br","br","br","br","br","br","br","  ","  ","  ","fg","st","  ","  ","br"},
+{"br","  ","  ","  ","fg","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","fg","fg","  ","  ","br"},
+{"br","  ","  ","  ","fg","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","fg","fg","  ","  ","br"},
+{"br","  ","  ","  ","fg","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","br","fg","fg","  ","  ","br"},
+{"br","  ","  ","  ","fg","  ","  ","  ","st","  ","  ","  ","  ","  ","br","st","br","br","br","br","br","br","  ","br"},
+{"br","  ","  ","  ","br","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","br","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","br","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","br"},
+{"br","  ","  ","  ","br","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","  ","fg"},
+{"br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br"},
+     };
+
+      setup_from_readablemap(map_1,1);
+      setup_from_readablemap(map_2,2);
+}
+
+
+
+
+void map::setup_from_readablemap(QVector<QVector<QString>> map, int lv)
+{
+    current_map.resize(Width/get_width(), QVector<ground>(Height/get_height()));
+
+    for (int i = 0; i < map.size(); i ++){
+         for (int j = 0; j < map.size(); j ++){
+            if (map[j][i] == "br"){
+               ground brick(block_Width*i,block_Height*j);
+               current_map[i][j] = brick;
+            }
+
+            if (map[j][i] == "st"){
+                  stair stai_r(block_Width*i,block_Height*j);
+                  current_map[i][j] = stai_r;
+            }
+
+            if (map[j][i] == "ro"){
+                  rope ro_pe(block_Width*i,block_Height*j);
+                  current_map[i][j] = ro_pe;
+            }
+
+            if (map[j][i] == "fg"){
+                  fake_ground fake(block_Width*i,block_Height*j);
+                  QPixmap pixmap(":/images/map.jpg");
+                  fake.setpixmap(pixmap);
+                  current_map[i][j] = fake;
+            }
          }
-    }
+     }
+     board[lv] = current_map;
 
-    for (int i = 12;i < 20; i++)
-    {
-
-             setup_brick(i,10);
-              setup_brick(i-2,14);
-    }
-
-
-
-    for (int i = 10;i < 20; i++)
-    {
-         for (int j = 0;j < 9; j++)
-             setup_stair(i,j);
-    }
-    board[1] = current_map;
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

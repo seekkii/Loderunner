@@ -12,11 +12,15 @@ SOURCES += \
     character.cpp \
     main.cpp \
     map.cpp \
+    mobs.cpp \
+    start_menu.cpp \
     ui.cpp
 
 HEADERS += \
     character.h \
     map.h \
+    mobs.h \
+    start_menu.h \
     ui.h
 
 FORMS +=
