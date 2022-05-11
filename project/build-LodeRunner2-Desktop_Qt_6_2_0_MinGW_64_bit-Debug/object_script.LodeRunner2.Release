@@ -1,0 +1,13 @@
+release/character.o
+release/custom_widget.o
+release/key_widget.o
+release/main.o
+release/map.o
+release/mobs.o
+release/start_menu.o
+release/ui.o
+release/qrc_resources.o
+release/moc_custom_widget.o
+release/moc_key_widget.o
+release/moc_start_menu.o
+release/moc_ui.o

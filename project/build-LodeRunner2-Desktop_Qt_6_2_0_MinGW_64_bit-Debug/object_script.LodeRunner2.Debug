@@ -1,0 +1,13 @@
+debug/character.o
+debug/custom_widget.o
+debug/key_widget.o
+debug/main.o
+debug/map.o
+debug/mobs.o
+debug/start_menu.o
+debug/ui.o
+debug/qrc_resources.o
+debug/moc_custom_widget.o
+debug/moc_key_widget.o
+debug/moc_start_menu.o
+debug/moc_ui.o
