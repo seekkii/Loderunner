@@ -8,7 +8,6 @@ const int Height = 1000;
 const int Width = 1000;
 
 
-
 class ground
 {
 public:
@@ -28,16 +27,34 @@ public:
     QString get_type();//get type
 
     bool isGround();//check if ground is of type ground
+    QTimer* get_respawntimer();
+    bool get_digged();
+    void set_digged(bool digged);
 
+    public slots:
 
-
+       void respawnslot();
 protected:
     float x;
     float y;
     QString type;
     QPixmap ground_img;
     QSize size;
+    QTimer *respawn;
+    bool digged;
 };//ground
+
+class bonus : public ground
+{
+public:
+    bonus(float x, float y): ground(x,y)
+    {
+        ground_img = QPixmap();
+        size.setHeight(30);
+        size.setWidth(30);
+        type = "bn";
+    }
+};
 
 class stair :public ground
 {

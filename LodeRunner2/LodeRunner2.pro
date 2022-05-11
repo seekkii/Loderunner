@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     character.cpp \
+    key_widget.cpp \
     main.cpp \
     map.cpp \
     mobs.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
 
 HEADERS += \
     character.h \
+    key_widget.h \
     map.h \
     mobs.h \
     start_menu.h \
@@ -33,4 +35,3 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     resources.qrc \
-

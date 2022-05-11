@@ -23,9 +23,82 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
+struct qt_meta_stringdata_ButtonLabel_t {
+    const uint offsetsAndSize[2];
+    char stringdata0[12];
+};
+#define QT_MOC_LITERAL(ofs, len) \
+    uint(offsetof(qt_meta_stringdata_ButtonLabel_t, stringdata0) + ofs), len 
+static const qt_meta_stringdata_ButtonLabel_t qt_meta_stringdata_ButtonLabel = {
+    {
+QT_MOC_LITERAL(0, 11) // "ButtonLabel"
+
+    },
+    "ButtonLabel"
+};
+#undef QT_MOC_LITERAL
+
+static const uint qt_meta_data_ButtonLabel[] = {
+
+ // content:
+      10,       // revision
+       0,       // classname
+       0,    0, // classinfo
+       0,    0, // methods
+       0,    0, // properties
+       0,    0, // enums/sets
+       0,    0, // constructors
+       0,       // flags
+       0,       // signalCount
+
+       0        // eod
+};
+
+void ButtonLabel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+{
+    (void)_o;
+    (void)_id;
+    (void)_c;
+    (void)_a;
+}
+
+const QMetaObject ButtonLabel::staticMetaObject = { {
+    QMetaObject::SuperData::link<QLabel::staticMetaObject>(),
+    qt_meta_stringdata_ButtonLabel.offsetsAndSize,
+    qt_meta_data_ButtonLabel,
+    qt_static_metacall,
+    nullptr,
+qt_incomplete_metaTypeArray<qt_meta_stringdata_ButtonLabel_t
+, QtPrivate::TypeAndForceComplete<ButtonLabel, std::true_type>
+
+
+
+>,
+    nullptr
+} };
+
+
+const QMetaObject *ButtonLabel::metaObject() const
+{
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
+}
+
+void *ButtonLabel::qt_metacast(const char *_clname)
+{
+    if (!_clname) return nullptr;
+    if (!strcmp(_clname, qt_meta_stringdata_ButtonLabel.stringdata0))
+        return static_cast<void*>(this);
+    return QLabel::qt_metacast(_clname);
+}
+
+int ButtonLabel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+{
+    _id = QLabel::qt_metacall(_c, _id, _a);
+    return _id;
+}
 struct qt_meta_stringdata_ui_t {
-    const uint offsetsAndSize[24];
-    char stringdata0[82];
+    const uint offsetsAndSize[30];
+    char stringdata0[94];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(offsetof(qt_meta_stringdata_ui_t, stringdata0) + ofs), len 
@@ -42,12 +115,15 @@ QT_MOC_LITERAL(38, 3), // "mob"
 QT_MOC_LITERAL(42, 14), // "mobs_go_around"
 QT_MOC_LITERAL(57, 10), // "setup_game"
 QT_MOC_LITERAL(68, 5), // "reset"
-QT_MOC_LITERAL(74, 7) // "next_lv"
+QT_MOC_LITERAL(74, 7), // "next_lv"
+QT_MOC_LITERAL(82, 7), // "respawn"
+QT_MOC_LITERAL(90, 1), // "i"
+QT_MOC_LITERAL(92, 1) // "j"
 
     },
     "ui\0fall\0\0Character&\0cha\0mobfall\0mobs&\0"
     "mob\0mobs_go_around\0setup_game\0reset\0"
-    "next_lv"
+    "next_lv\0respawn\0i\0j"
 };
 #undef QT_MOC_LITERAL
 
@@ -57,7 +133,7 @@ static const uint qt_meta_data_ui[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -65,12 +141,13 @@ static const uint qt_meta_data_ui[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    1,   50,    2, 0x0a,    1 /* Public */,
-       5,    1,   53,    2, 0x0a,    3 /* Public */,
-       8,    1,   56,    2, 0x0a,    5 /* Public */,
-       9,    0,   59,    2, 0x0a,    7 /* Public */,
-      10,    0,   60,    2, 0x0a,    8 /* Public */,
-      11,    0,   61,    2, 0x0a,    9 /* Public */,
+       1,    1,   56,    2, 0x0a,    1 /* Public */,
+       5,    1,   59,    2, 0x0a,    3 /* Public */,
+       8,    1,   62,    2, 0x0a,    5 /* Public */,
+       9,    0,   65,    2, 0x0a,    7 /* Public */,
+      10,    0,   66,    2, 0x0a,    8 /* Public */,
+      11,    0,   67,    2, 0x0a,    9 /* Public */,
+      12,    2,   68,    2, 0x0a,   10 /* Public */,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
@@ -79,6 +156,7 @@ static const uint qt_meta_data_ui[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int,   13,   14,
 
        0        // eod
 };
@@ -95,6 +173,7 @@ void ui::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_
         case 3: _t->setup_game(); break;
         case 4: _t->reset(); break;
         case 5: _t->next_lv(); break;
+        case 6: _t->respawn((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         default: ;
         }
     }
@@ -108,7 +187,7 @@ const QMetaObject ui::staticMetaObject = { {
     nullptr,
 qt_incomplete_metaTypeArray<qt_meta_stringdata_ui_t
 , QtPrivate::TypeAndForceComplete<ui, std::true_type>
-, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<Character &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<mobs &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<mobs &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>
+, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<Character &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<mobs &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<mobs &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<int, std::false_type>, QtPrivate::TypeAndForceComplete<int, std::false_type>
 
 
 >,
@@ -135,13 +214,13 @@ int ui::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 7)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }

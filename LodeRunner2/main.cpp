@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     QApplication app{argc, argv};
 
 
-   start_menu s;
+   ui s;
 
 
    s.show();

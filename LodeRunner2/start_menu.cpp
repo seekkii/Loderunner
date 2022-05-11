@@ -17,7 +17,7 @@ start_menu::start_menu(QFrame *parent)
     layout->addWidget(start,2,2);
 
 
-    setStyleSheet("border-image: url(:/images/background.jpg) 0 0 0 0 stretch stretch;");
+    setStyleSheet("border-image: url(:/images/start_background.jpg) 0 0 0 0 stretch stretch;");
     start->setStyleSheet("QPushButton#start {border-image: url()};");
 
 }

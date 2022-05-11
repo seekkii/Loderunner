@@ -21,4 +21,6 @@ class start_menu: public QFrame
 
 };
 
+
+
 #endif // START_MENU_H

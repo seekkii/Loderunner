@@ -19,7 +19,12 @@ public:
     bool on_map();//check if character position is on map
     int get_walkstepdis();// walk distance of character
 
+    void setdirection(QString direction);
+    QString getdirection();
+
+
     void set_pos(float x, float y);//set current pos to (x,y)
+    QString direction;
     QPixmap getpixmap();//get pix map of character
     QSize getSize();//get size of pixmap/your char
     void setSize(int h, int w);//set size of~

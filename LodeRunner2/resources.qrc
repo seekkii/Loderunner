@@ -7,5 +7,10 @@
         <file>fake_ground.png</file>
         <file>background.jpg</file>
         <file>start_background.jpg</file>
+        <file>keyselection_bar.png</file>
+        <file>namebar.png</file>
+        <file>textbar.png</file>
+        <file>key_background.jpg</file>
+        <file>coins.png</file>
     </qresource>
 </RCC>
