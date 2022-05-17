@@ -4,7 +4,23 @@
 #include <QPixmap>
 #include <QLabel>
 #include <QTimer>
-#include <map.h>
+
+class animation
+{
+    public:
+        animation();
+        void setname(QString name);
+        QString getname();
+        void increase_counts();
+        void set_animate();
+        QPixmap current_frame();
+        QVector<QPixmap> animate;
+        int animationcount;
+        QString name;
+        QString filename;
+
+};
+
 
 class Character
 {
@@ -21,32 +37,39 @@ public:
 
     void setdirection(QString direction);
     QString getdirection();
+    void move_left();
+    void move_right();
+    void move_up();
+    void move_down();
 
 
     void set_pos(float x, float y);//set current pos to (x,y)
+
     QString direction;
     QPixmap getpixmap();//get pix map of character
     QSize getSize();//get size of pixmap/your char
     void setSize(int h, int w);//set size of~
     QTimer* get_timer();//get timer of character
+    QTimer* get_inactivetimer();
+    QPixmap char_frame();
 
-
-
-
-
-protected slots:
-
-
+    int get_life();
+    void update_life();
 
 protected:
     float x_cor;
     float y_cor;
-
-
     int step;
-    QPixmap char_img;
+    int life;
+
+    animation ani_right;
+    animation ani_left;
+    animation ani_down;
+    animation ani_up;
+
     QSize size;
     QTimer *timer;
+    QTimer* inactive_timer;
 };
 
 

@@ -100,15 +100,15 @@ int CustomButton::gety()
 }
 
 
-
-
-
 key_widget::key_widget(QWidget *parent): QWidget(parent)
 {
     resize(500,500);
     setup_init_key();
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
+    setWindowFlags(Qt::FramelessWindowHint);
+    hide();
+
     left_button.set_up("LEFT", "←" ,0,20);
     right_button.set_up("RIGHT","→",0,60);
     up_button.set_up("UP","↑",0,100);

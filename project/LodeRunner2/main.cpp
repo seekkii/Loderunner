@@ -12,11 +12,8 @@ int main(int argc, char *argv[])
     QApplication app{argc, argv};
 
 
-
-    start_menu new_game;
-    new_game.show();
-
-
+    ui gui;
+    gui.show();
 
 
 

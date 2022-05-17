@@ -13,4 +13,16 @@
         <file>key_background.jpg</file>
         <file>coins.png</file>
     </qresource>
+    <qresource prefix="/animation">
+        <file>right0.png</file>
+        <file>right1.png</file>
+        <file>right2.png</file>
+        <file>right3.png</file>
+        <file>right4.png</file>
+        <file>C:/Users/Umi/Pictures/Screenshots/right0.png</file>
+        <file>C:/Users/Umi/Pictures/Screenshots/right1.png</file>
+        <file>C:/Users/Umi/Pictures/Screenshots/right2.png</file>
+        <file>C:/Users/Umi/Pictures/Screenshots/right3.png</file>
+        <file>C:/Users/Umi/Pictures/Screenshots/right4.png</file>
+    </qresource>
 </RCC>

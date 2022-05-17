@@ -3,6 +3,8 @@
 custom_widget::custom_widget()
 {
     setFixedSize(500,500);
+    QPushButton *newbutton = new QPushButton("Start" ,this);
+    newbutton->move(rect().center());
 }
 
 void custom_widget::paintEvent(QPaintEvent *)

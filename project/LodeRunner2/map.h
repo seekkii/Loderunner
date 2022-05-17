@@ -1,9 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
-
-#include <QPixmap>
-#include <QLabel>
+#include <character.h>
+#include <QtUiTools>
 const int Height = 1000;
 const int Width = 1000;
 
@@ -25,15 +24,15 @@ public:
 
     void set_type(QString type);//type of ground diffrentiate by qstring
     QString get_type();//get type
+    bool isground();
 
-    bool isGround();//check if ground is of type ground
     QTimer* get_respawntimer();
-    bool get_digged();
+    bool is_digged();
     void set_digged(bool digged);
 
-    public slots:
 
-       void respawnslot();
+
+
 protected:
     float x;
     float y;
@@ -101,20 +100,37 @@ class fake_ground :public ground
 class map
 {
     public:
+        friend class Character;
         map();
         int get_height();
         int get_width();
         QVector<QVector<ground>> get_map(int lv);
-       void setup_map();
-
+        void setup_map();
         void setup_from_readablemap(QVector<QVector<QString>> map, int lv);
+        void setup_initial_pos(Character &cha);
+        int level(){
+            return current_lv;
+        };
+        void set_level(int lv){
+            current_lv = lv;
+        }
+        QVector<QVector<int>>griddownpath();
+        QVector<QVector<int>>griduppath();
 
-    protected slots:
-        void fall();
+
+        QVector<QVector<int>> upgrid;
+        QVector<QVector<int>> downgrid;
+         QVector<QVector<int>> getuppath(){
+             return upgrid;
+         }
+         QVector<QVector<int>> getdownpath(){
+             return downgrid;
+         }
+
+
+
     private:
-
         QVector<QVector<ground>> current_map;
-
         QMap<int,QVector<QVector<ground>>> board;
         const int block_Height = 30;
         const int block_Width = 30;

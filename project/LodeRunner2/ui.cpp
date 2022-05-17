@@ -1,38 +1,62 @@
 #include "ui.h"
 #include <QKeyEvent>
 
+
+
 ui::ui(QWidget *parent)
     : QWidget(parent)
 {
     setObjectName("gui");
-    setMinimumSize(1000,1000);
+    setFixedSize(1000,700);
     setFocusPolicy(Qt::WheelFocus);
-
 
     setup_losing_menu();
     setup_wining_menu();
     key_menu = new key_widget(this);
-    key_menu->setWindowFlags(Qt::FramelessWindowHint);
-    key_menu->hide();
-
-    current_lv = 1;
 
     setup_game();
+    setup_score();
+}
+
+void ui::setup_score(){
+    score_label = new QLabel(QString::number(score), this);
+    score_label->setStyleSheet("QLabel { background-color : red; color : blue; }");
+    score_label->move(0, rect().center().y()*1.84);
+    QFont f( "", 40, QFont::StyleItalic);
+    score_label->setFont(f);
+    QString life = " LIFE "+QString::number(you.get_life())+" ";
+    QString level = " LEVEL "+QString::number(gamemap->level())+" ";
+    score_label->setText("00000000"+life+level);
+    score_label->show();
+}
+
+void ui::update_score(){
+
+        QString score_str = QString::number(score);
+        int size = 8-score_str.size();
+        for (int first = 0 ; first<size; first++){
+            score_str = "0" + score_str;
+            QString life = " LIFE "+QString::number(you.get_life())+" ";
+            QString level = " LEVEL "+QString::number(gamemap->level())+" ";
+            score_label->setText(score_str+life+level);
+
+         }
 
 }
-void ui::setup_initial_pos()
-{
-   if (current_lv == 1){
-       you.set_pos(100,100);
-   }
-   if (current_lv == 2){
-       you.set_pos(400,470);
-   }
+void ui::setup_initial_pos(){
+    if (gamemap->level() == 1){
+        you.set_pos(0,0);
+        mob[0].set_pos(340,200);
+          mob[1].set_pos(300,500);
+            mob[2].set_pos(140,500);
 
+    }
+    if (gamemap->level() == 2){
+        you.set_pos(300,300);
+    }
 
 }
-void ui::setup_losing_menu()
-{
+void ui::setup_losing_menu(){
     lose_menu = new QWidget();
     QPushButton *retry = new QPushButton("&retry ?",lose_menu);
     connect(retry, SIGNAL(clicked()), this, SLOT(reset()));
@@ -41,72 +65,65 @@ void ui::setup_losing_menu()
     layout->addWidget(retry,1,2);
 }
 
-void ui::setup_wining_menu()
-{
+void ui::setup_wining_menu(){
     win_menu = new QWidget();
     QPushButton *next_lv = new QPushButton("&next level ?",win_menu);
     connect(next_lv, SIGNAL(clicked()), this, SLOT(next_lv()));
     QGridLayout *layout = new QGridLayout(win_menu);
     next_lv->setFixedSize(100,40);
     layout->addWidget(next_lv,1,2);
-
 }
 
 void ui::respawn(int i ,int j){
     if (cur_map[i][j].get_type()==""){
         cur_map[i][j].set_type("br");
+        cur_map[i][j].set_digged(false);
+
     }
     update();
 }
 
-void ui::bonus_respawn(int i, int j){
-if (cur_map[i][j].get_type()==""){
-    cur_map[i][j].set_type("bn");
-}
-}
+
 void ui::setup_game()
 {
     gamemap = new map();//make new map
     gamemap->setup_map();
-    cur_map = gamemap->get_map(current_lv);//setup map lv 1
+    cur_map = gamemap->get_map(gamemap->level());//setup map lv 1
+    uppath = gamemap->griduppath();
+    downpath = gamemap->griddownpath();
 
-
-
-
-
+    //mob
     mob.resize(3);
     for (int i = 0; i < mob.size(); i++)
     {
          mobs new_mob;
          mob[i] = new_mob;
+         mob[i].mobpath.resize(3);
 
     }// generate new vector of mobs
     setup_initial_pos();
-
-
     connect(you.get_timer(),  &QTimer::timeout, this, [this]{ fall(you); });
-    if (falling(you)){
-            you.get_timer()->start(50);
-    }//connect your char timer to fall() slot for fall animation
-
     for (int i = 0 ; i < mob.size(); i++){
-        if (!mob[i].on_map())
-        {
-            mob[i].set_pos(100,100);
-        }
         connect(mob[i].get_rand_timer(),  &QTimer::timeout, this, [i,this]{ mobs_go_around(mob[i]); });
         connect(mob[i].get_timer(),  &QTimer::timeout, this, [i,this]{ mobfall(mob[i]); });
-
-        if (falling(mob[i])){
-                mob[i].get_timer()->start(100);
-        }
-        mob[i].get_rand_timer()->start(200);
+        connect(mob[i].get_inactivetimer(),&QTimer::timeout, this, [i,this]{ inactive(mob[i]); }); 
+        mob[i].get_rand_timer()->start(100);
     }//connect mobs timer to fall() slot for fall animation
 
 
 
 }
+void ui::inactive(mobs &mob){
 
+    cur_map[mob.row()][mob.col()].setpixmap(QPixmap(":/images/map.jpg"));
+    mob.set_pos(mob.x(),mob.y()-gamemap->get_height());
+
+    mob.get_rand_timer()->start();
+    mob.get_timer()->start();
+    recaculate(mob);
+    update();
+
+}
 void ui::start_mobtimer()
 {
     for (int i = 0 ; i < mob.size(); i++){
@@ -114,10 +131,10 @@ void ui::start_mobtimer()
         {
             mob[i].set_pos(100,100);
         }
-        if (falling(mob[i])){
+        if (!floor_check(mob[i].x(),mob[i].y())){
                 mob[i].get_timer()->start(100);
         }
-        mob[i].get_rand_timer()->start(200);
+        mob[i].get_rand_timer()->start(100);
     }
 }
 
@@ -133,11 +150,11 @@ void ui::stop_mobtimer()
 
 void ui::print_map(QPainter &painter)
 {
-    for (int i =0; i < gamemap->get_map(1).size() ;i++)
-        for (int j =0; j < gamemap->get_map(1).size();j++)
+    for (int i =0; i < cur_map.size() ;i++)
+        for (int j =0; j < cur_map[cur_map.size()-1].size();j++)
         {
-            float w = i*cur_map[i][j].get_size().width();
-            float h = j*cur_map[i][j].get_size().height();
+            float w = (i)*cur_map[i][j].get_size().width();
+            float h = (j)*cur_map[i][j].get_size().height();
             QSize size_block = cur_map[i][j].get_size();
             auto r = QRect{QPoint(w,h),size_block};
 
@@ -146,7 +163,7 @@ void ui::print_map(QPainter &painter)
                 painter.setPen(pen);
                 painter.setBrush(Qt::white);
                 int width = gamemap->get_width();
-                painter.drawLine(w+width,h-width/2,w,h-width/2);
+                painter.drawLine(w+width,h,w,h);
             }else{
 
                 if (cur_map[i][j].get_type() == "fg"){
@@ -163,8 +180,7 @@ void ui::print_map(QPainter &painter)
                         if (you.row()==i && you.col()==j){
                              cur_map[i][j].set_type("");
                              painter.drawPixmap(r,cur_map[i][j].getpixmap());
-                             connect(cur_map[i][j].get_respawntimer(),  &QTimer::timeout, this, [i,j,this]{ bonus_respawn(i,j); });
-                             cur_map[i][j].get_respawntimer()->start(10000);
+
                         }
                         else{
                              painter.drawPixmap(r,cur_map[i][j].getpixmap());
@@ -181,48 +197,53 @@ void ui::print_map(QPainter &painter)
 }
 void ui::paintEvent(QPaintEvent *)
 {
- QPainter painter(this);
- auto back = QRect{QPoint(0,0), QSize(1000,1000)};//rectangle that has center of your char to print pixmap from
- QPixmap m = QPixmap(":/images/background.jpg");
- painter.drawPixmap(back,m);
+    QPainter painter(this);
+    auto back = QRect{QPoint(0,0), QSize(1000,1000)};//rectangle that has center of your char to print pixmap from
+    QPixmap m = QPixmap(":/images/background.jpg");
+    painter.drawPixmap(back,m);
 
- print_map(painter);
+    print_map(painter);
+     auto r = QRect{QPoint(you.x(),you.y()), QSize(30,30)};//rectangle that has center of your char to print pixmap from
 
-
- QSize char_size = you.getSize();//get your character's size
- float x = you.x();//get your character's x cordinate
- float y = you.y();//get your character's y cordinate
- auto r = QRect{QPoint(x,y), char_size};//rectangle that has center of your char to print pixmap from
- QPixmap you_img = you.getpixmap();//get pixmap of your char
- painter.setPen(Qt::blue);
- painter.setBrush(Qt::blue);
- painter.drawRect(r);
-
- //print mobs
- for (int i = 0; i < mob.size();i++){
-     painter.setPen(Qt::red);
-      painter.setBrush(Qt::red);
-     auto r_mob = QRect{QPoint(mob[i].x(),mob[i].y()), char_size};
-     painter.drawEllipse(r_mob);
- }
+    painter.setPen(Qt::blue);
+    painter.setBrush(Qt::blue);
+    painter.drawRect(r);
 
 
- if (falling(you)){
-     you.get_timer()->start(100);
- }
- else
-     you.get_timer()->stop(); //if your char falling check is true start timer to call fall slot
-
- for (int i = 0; i < mob.size(); i++)
- if (falling(mob[i]))
- {
-     mob[i].get_timer()->start(100);
-
- } else mob[i].get_timer()->stop();//if mob falling check is true start timer to call fall slot
+    //print mobs
+    painter.setPen(Qt::red);
+    painter.setBrush(Qt::red);
+    for (int i = 0; i < mob.size();i++){
+        auto r_mob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(30,30)};
+        painter.drawEllipse(r_mob);
 
 
 
+     }
+    for (int i = 0; i < mob.size(); i++){
+        if (falling(mob[i]) && !mob[i].get_inactivetimer()->isActive()){
+            mob[i].get_timer()->start(100);
+        }
+        else {
+            mob[i].get_timer()->stop();//if mob falling check is true start timer to call fall slot
+        }
+        if(cur_map[mob[i].row()][mob[i].col()].get_type() == "bn" && mob[i].holding() == false){
+            cur_map[mob[i].row()][mob[i].col()].set_type("");
+            mob[i].set_holding(true);
+        }
+        if (!mob[i].mobpath.isEmpty()){
 
+            QPair<int,int> youpos(you.col(),you.row());
+            if (mob[i].mobpath.back()!=youpos)
+                recaculate(mob[i]);
+        }
+    }
+     if (falling(you)){
+         you.get_timer()->start(100);
+     }
+     else{
+         you.get_timer()->stop();
+     } //if your char falling check is true start timer to call fall slot
 
 
 
@@ -231,62 +252,74 @@ void ui::paintEvent(QPaintEvent *)
 
 }
 
+void ui::recaculate(mobs &mob){
 
-void ui::fall(Character &cha)
-{
-    float x = cha.x();
-    float y = cha.y();
-    const int fall_per_milisec = 50;
-    int j = trunc(y /gamemap->get_height());
-    if (y+fall_per_milisec < gamemap->get_height()*(j+1) )
-        {
-            cha.set_pos(x,y+fall_per_milisec);
-        }
-    else{
-
-        cha.set_pos(x,gamemap->get_height()*(j+1));
+    QVector<QVector<int>> grid;
+    if (mob.col() > you.col()){
+            grid = uppath;
     }
-    update();
-}// reduce cha 's y cordinate by fall_per_milisec
-
-
-void ui::mobfall(mobs &mob)
-{
-    float x = mob.x();
-    float y = mob.y();
-    const int fall_per_milisec = 50;
-    int j = trunc(y /gamemap->get_height());
-    if (y+fall_per_milisec < gamemap->get_height()*(j+1) )
-        {
-            mob.set_pos(x,y+fall_per_milisec);
-        }
     else{
-
-        mob.set_pos(x,gamemap->get_height()*(j+1));
+            grid = downpath;
     }
-    update();
-}// reduce mob's y cordinate by fall_per_milisec
+          QPair<int,int> src(ceil(mob.y()/30), mob.row());
+          QPair<int,int> dest;
+          dest = QPair<int,int> (you.col(), you.row());
+          pathsearch path;
+          path.search(grid,src,dest);
+          mob.mobpath = path.getpathlist();
+
+
+}// recalculate path from mob to your character
+
 
 
 bool ui::falling(Character &cha)
 {
 
-    int i = round((cha.x())/gamemap->get_width());
-    int j = trunc(cha.y()/gamemap->get_height());
-
-
-    if (!cha.on_map())
-    {
-        return true;
+    int i = cha.row();
+    int j = cha.col();
+    if(cur_map[i][j].get_type() == "ro"){
+     return false;
     }
-    if(cur_map[i][j+1].get_type()=="" ||cur_map[i][j+1].get_type()=="fg" || cur_map[i][j+1].get_type()=="bn"){
+    if(cur_map[i][j+1].get_type()=="" ||cur_map[i][j+1].get_type()=="fg" || cur_map[i][j+1].get_type()=="bn"
+           ){
             return true;
     }
     else{
 
             return false;
         }
-}//if cha is not on map, falling is definitely true. Check if [i][i+1] is ground, return true if so and false otherwise
+}
+void ui::fall(Character &cha)
+{
+    cha.move_down();
+    if (!falling(cha))
+    {
+        for (int i = 0 ; i < mob.size(); i++)
+           {
+            recaculate(mob[i]);
+
+        }
+
+    }
+
+
+
+    if (lose()){
+        lose_menu->show();
+    }
+    update_score();
+
+    int i = you.row();
+    int j = you.col();
+    if (cur_map[i][j].get_type() == "bn"){
+        score+=500;
+        cur_map[i][j].set_type("");
+    }
+
+    update();
+}// reduce cha 's y cordinate by fall_per_milisec
+
 
 void ui::mousePressEvent(QMouseEvent *event)
 {
@@ -303,82 +336,80 @@ void ui::keyPressEvent(QKeyEvent *event)
     float x = you.x();
     float y = you.y();
     QMap<QString,Qt::Key> key_map = key_menu->get_key_map();
-    if(!falling(you))
-    {
-        if(event->key() == key_map["UP"]){
-            if(!is_object(x,y-dis))
-                you.set_pos(x,y-dis);
-            you.setdirection("UP");
-        }
-        if(event->key() == key_map["DOWN"]){
-          if(!floor_check(x,y+dis))
-             you.set_pos(x,y+dis);
-           you.setdirection("DOWN");
-        }
-        if(event->key() == key_map["RIGHT"]){
-            if(!is_object(x+dis,y))
-                you.set_pos(x+dis,y);
-             you.setdirection("RIGHT");
-        }
-        if(event->key() == key_map["LEFT"]){
-            if(!is_object(x-dis,y))
-                you.set_pos(x-dis,y);
-             you.setdirection("LEFT");
-        }
-        if(event->key() == key_map["DIG"]){
-            if (you.getdirection() == "LEFT"&& (!is_object(x-dis,y))){
-                int i = you.row()-1;
-                int j = you.col()+1;
-                if (cur_map[you.row()-1][you.col()+1].get_type() == "br"){
-                    cur_map[you.row()-1][you.col()+1].set_type("");
-                     connect(cur_map[i][j].get_respawntimer(),  &QTimer::timeout, this, [i,j,this]{ respawn(i,j); });
-                    cur_map[you.row()-1][you.col()+1].get_respawntimer()->start(2000);
-                }
+     if(falling(you)){
+         return;
+     }
+     if(event->key() == key_map["UP"]&&(!is_object(x,y-dis))){
+               you.move_up();
+     }
+     if(event->key() == key_map["DOWN"]&&(!floor_check(x,y+dis))){
+             you.move_down();
+     }
+     if(event->key() == key_map["RIGHT"]&&(!is_object(x+dis,y))){
+            you.move_right();
+
+     }
+     if(event->key() == key_map["LEFT"]&&(!is_object(x-dis,y))){
+           you.move_left();
+     }
+     if(event->key() == key_map["DIG"]){
+           if ((!is_object(x+dis,y))){
+                        int i = you.row()+1;
+                        int j = you.col()+1;
+                        if (cur_map[i][j].get_type() == "br"){
+                            cur_map[i][j].set_type("");
+                            cur_map[i][j].set_digged(true);
+                             connect(cur_map[i][j].get_respawntimer(),  &QTimer::timeout, this, [i,j,this]{ respawn(i,j); });
+                            cur_map[you.row()+1][you.col()+1].get_respawntimer()->start(5000);
+                            you.setdirection(you.getdirection());
+
+                        }
             }
-            if (you.getdirection() == "RIGHT"&&(!is_object(x+dis,y))){
-                int i = you.row()+1;
-                int j = you.col()+1;
-                if (cur_map[you.row()+1][you.col()+1].get_type() == "br"){
-                    cur_map[you.row()+1][you.col()+1].set_type("");
-                     connect(cur_map[i][j].get_respawntimer(),  &QTimer::timeout, this, [i,j,this]{ respawn(i,j); });
-                    cur_map[you.row()+1][you.col()+1].get_respawntimer()->start(2000);
-                }
-            }
-        }
-        int i = you.row();
-        int j = you.col();
-        qDebug()<<i << j<<cur_map[i][j].get_type();
-        if (cur_map[i][j].get_type() == "bn"){
-            cur_map[i][j].set_type("");
-            connect(cur_map[i][j].get_respawntimer(),  &QTimer::timeout, this, [i,j,this]{ bonus_respawn(i,j); });
-            cur_map[i][j].get_respawntimer()->start(10000);
+      }
+
+      int i = you.row();
+      int j = you.col();
+      if (cur_map[i][j].get_type() == "bn"){
+          score+=500;
+          cur_map[i][j].set_type("");
+      }
+
+        //everytime character position change
 
 
-        }
-        update();
-    }
+      update_score();
+      update();
 
-    if (win()){
-      show_win_menu();
-    }
-    if (lose()){
-       show_losing_menu();
-    }
 
-    if(event->key() == Qt::Key_Shift&& !key_menu->isVisible()){
-        key_menu->move(rect().center().x()/2, rect().center().y()/4);
-        key_menu->show();
-        stop_mobtimer();
-    }
+      if (lose()){
+         you.update_life();
+         show_losing_menu();
+      }
+      if (win()){
+         show_win_menu();
+      }
+
+
+      if(event->key() == Qt::Key_Shift&& !key_menu->isVisible()){
+         key_menu->move(rect().center().x()/2, rect().center().y()/4);
+         key_menu->show();
+         stop_mobtimer();
+      }
+
 
 
 
 }//override keyevent to change your character cordinates on a specific button
 
+bool ui::on_map(Character &cha){
+    return (cha.row() >= 0) && (cha.row() < cur_map.size()) && (cha.col() >= 0)
+            && (cha.col() < cur_map[cur_map.size()].size());
+}
+
 bool ui::is_object(float x, float y)
 {
 
-    int i = round((x)/gamemap->get_width());
+    int i = trunc((x)/gamemap->get_width());
     int j = round(y/gamemap->get_height());
 
         if(cur_map[i][j].get_type() == "br"){
@@ -392,8 +423,11 @@ bool ui::is_object(float x, float y)
 
 bool ui::floor_check(float x, float y)
 {
-    int i = round((x)/gamemap->get_width());
-    int j = ceil(y/gamemap->get_height());
+    int i,j;
+        i = round((x)/gamemap->get_width());
+        j = ceil(y/gamemap->get_height());
+
+
     if(cur_map[i][j].get_type() == "br"){
         return true;
     }
@@ -403,55 +437,82 @@ bool ui::floor_check(float x, float y)
 
 }
 
+bool ui::is_bonus(float x, float y){
+    int i = round((x)/gamemap->get_width());
+    int j = ceil(y/gamemap->get_height());
+    if(cur_map[i][j].get_type() == "bn"){
+            return true;
+        }
+        else{
+            return false;
+        }
+}
 
+void ui::mobfall(mobs &mob)
+{
+
+    if (cur_map[mob.row()][mob.col()].is_digged()){
+        if (mob.holding()){
+            bonus coin(gamemap->get_width()*mob.row(),gamemap->get_height()*mob.col());
+            QPixmap pixmap(":/images/coins.png");
+            coin.setpixmap(pixmap);
+            cur_map[mob.row()][mob.col()-1] = coin;
+            mob.set_holding(false);
+        }
+        mob.get_timer()->stop();
+        mob.get_rand_timer()->stop();
+        mob.get_inactivetimer()->start(5000);
+        cur_map[mob.row()][mob.col()].set_type("br");
+         cur_map[mob.row()][mob.col()].setpixmap(QPixmap());
+    }
+    else{
+        mob.move_down();
+    }
+    update();
+}// reduce mob's y cordinate by fall_per_milisec
 
 void ui::mob_action(mobs &mob)
 {
-
-    float x = mob.x();
-    float y = mob.y();
-    int dis = mob.get_walkstepdis();
-
-    int selection = QRandomGenerator::global()->bounded(0,4);
-    if(!falling(mob))
-    {
-
-        if(selection == 0) {
-           if(!is_object(x,y-dis))
-               mob.set_pos(x,y-dis);
+    if (falling(mob) ){
+        return;
+    }
+    if (mob.mobpath.isEmpty()){
+        return;
+    }
+    if(mob.x()== mob.mobpath.front().second*30 && mob.y()== mob.mobpath.front().first*30){
+       mob.mobpath.dequeue();
+    }
+    if (mob.mobpath.size() != 0){
+        if(mob.x()< mob.mobpath.front().second*30){
+            mob.move_right();
+            return;
+        }
+        if(mob.x() > mob.mobpath.front().second*30){
+            mob.move_left();
+            return;
+        }
+        if(mob.y()> mob.mobpath.front().first*30){
+            mob.move_up();
+            return;
+        }
+        if(mob.y()< mob.mobpath.front().first*30){
+            mob.move_down();
+            return;
         }
 
-        if(selection == 1){
-             if(!floor_check(x,y+dis))
-             mob.set_pos(x,y+dis);
-    }
-
-    if(selection == 2){
-         if(!is_object(x+dis,y))
-            mob.set_pos(x+dis,y);
     }
 
 
-    if(selection == 3){
-         if(!is_object(x-dis,y))
-            mob.set_pos(x-dis,y);
-    }
+   update();
+
 
 }
-    if (lose()){
-       show_losing_menu();
-    }
-    else{
-        update();
-    }
-
-}//mob_action() randomly chooses a number between 0 and 4,on each number choosen ,mobs will perform a different action according to how their's cordinates are changed
 
 void ui::mobs_go_around(mobs &mob)
 {
     mob_action(mob);
     update();
-}//slot that basically perform mob_action() for corresponding mob
+}//slot that performs mob_action() for corresponding mob
 
 
 bool ui::lose()
@@ -459,31 +520,28 @@ bool ui::lose()
     bool lose_case = false;
     for (int i = 0; i < mob.size();i++)
     {
-        if (abs(you.row()-mob[i].row()) < 2 && abs(you.col()-mob[i].col()) < 1 )
+        if (abs(you.row()-mob[i].row()) < 1 && abs(you.col()-mob[i].col()) < 1 )
         {
-            lose_case = true;
-            break;
+           lose_case = true;
         }
     }
-
     return lose_case;
+
+
 }//case of losing
 
 
-void ui::show_losing_menu()
-{
+void ui::show_losing_menu(){
     for (int i = 0 ; i < mob.size(); i++){
        mob[i].get_timer()->stop();
        mob[i].get_rand_timer()->stop();
     }
-
     lose_menu->resize(300,300);
     lose_menu->setWindowFlags(Qt::WindowTitleHint | Qt::WindowMinimizeButtonHint);
     lose_menu->show();
 }
 
-bool ui::win()
-{
+bool ui::win(){
     if (you.row()>22||you.col()>22)
         return true;
     else
@@ -508,20 +566,22 @@ void ui::show_win_menu()
 
 void ui::reset()
 {
-    you.set_pos(100,100);
     for (int i = 0 ; i < mob.size(); i++){
-       mob[i].get_rand_timer()->start(200);
+       mob[i].get_rand_timer()->start(100);
     }
-    cur_map = gamemap->get_map(current_lv);
     setup_initial_pos();
     update();
     lose_menu->close();
+    you.update_life();
 }
 
 void ui::next_lv()
 {
-    current_lv++;
-    cur_map = gamemap->get_map(current_lv);
+    gamemap->set_level(gamemap->level()+1);
+    cur_map = gamemap->get_map(gamemap->level());
+    uppath = gamemap->griduppath();
+    downpath = gamemap->griddownpath();
+
     start_mobtimer();
     setup_initial_pos();
     update();

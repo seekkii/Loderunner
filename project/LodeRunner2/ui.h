@@ -3,11 +3,11 @@
 
 #include <QMainWindow>
 
-#include <QtUiTools>
+
 #include <QDebug>
 #include <QRandomGenerator>
 #include <QFile>
-#include <character.h>
+#include <map.h>
 #include <mobs.h>
 #include <key_widget.h>
 
@@ -16,17 +16,16 @@ class ui:public QWidget
     Q_OBJECT
 
 public:
-        friend class Character;
-
         explicit ui(QWidget *parent = nullptr);// constructor
         void paintEvent(QPaintEvent *) override;// paintevent to draw gui
+        void setup_game();
 
-        bool falling(Character &cha);//check if an object is falling
         bool is_object(float x, float y);//check if x,y is occupied by another object from map
         bool floor_check(float x, float y);
         bool is_bonus(float x, float y);
-
+        bool falling(Character &cha);
         void mob_action(mobs& mob);
+        void recaculate(mobs& mob);
         void print_map(QPainter &painter);
 
         bool lose();
@@ -42,19 +41,21 @@ public:
         void stop_mobtimer();
         void setup_initial_pos();
 
-        void breakmove();
+        void setup_score();
+        void update_score();
 
+        bool on_map(Character &cha);
 
 public slots:
 
        void fall(Character &cha);
        void mobfall(mobs &mob);
        void mobs_go_around(mobs &mob);
-       void setup_game();
+
        void reset();
        void next_lv();
+       void inactive(mobs &mob);
        void respawn(int i , int j);
-       void bonus_respawn(int i ,int j);
 private:
 
        Character you;
@@ -63,17 +64,22 @@ private:
        map *gamemap;
        QVector<QVector<ground>> cur_map;
 
-       int current_lv;
-       bool idle;
+       long int score;
+
+
+       QVector<QVector<int>> uppath;
+       QVector<QVector<int>> downpath;
        QWidget *lose_menu;
        QWidget *win_menu;
        key_widget *key_menu;
+       QLabel * score_label;
 
 protected:
      void keyPressEvent(QKeyEvent *event) override;
      void mousePressEvent(QMouseEvent *event) override;
 
 };
+
 
 
 
