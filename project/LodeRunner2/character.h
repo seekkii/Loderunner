@@ -4,7 +4,7 @@
 #include <QPixmap>
 #include <QLabel>
 #include <QTimer>
-
+#include <map.h>
 class animation
 {
     public:
@@ -18,18 +18,16 @@ class animation
         int animationcount;
         QString name;
         QString filename;
-
 };
 
 
-class Character
+class Character :public ground
 {
 public:
-    friend class ground;
     Character();// constructor
 
-    float x() const;// return x cordinate
-    float y() const;//return y cordinate
+    int x() const;// return x cordinate
+    int y() const;//return y cordinate
     int row();//return corresponding row of x
     int col();//return corresponding col of y
     bool on_map();//check if character position is on map
@@ -43,7 +41,8 @@ public:
     void move_down();
 
 
-    void set_pos(float x, float y);//set current pos to (x,y)
+    void set_pos(int x, int y);//set current pos to (x,y)
+
 
     QString direction;
     QPixmap getpixmap();//get pix map of character

@@ -7,7 +7,7 @@
 #include <QDebug>
 #include <QRandomGenerator>
 #include <QFile>
-#include <map.h>
+#include <character.h>
 #include <mobs.h>
 #include <key_widget.h>
 
@@ -20,13 +20,18 @@ public:
         void paintEvent(QPaintEvent *) override;// paintevent to draw gui
         void setup_game();
 
-        bool is_object(float x, float y);//check if x,y is occupied by another object from map
+        bool is_object(int x, int y);//check if x,y is occupied by another object from map
         bool floor_check(float x, float y);
         bool is_bonus(float x, float y);
+        bool is_mob(float x, float y);
         bool falling(Character &cha);
-        void mob_action(mobs& mob);
-        void recaculate(mobs& mob);
-        void print_map(QPainter &painter);
+        void mob_action(mobs& mob);// algorithm for mob to move
+        bool mob_closeto_others(mobs&mob);
+
+        void recalculate_path(mobs& mob);// calculate path from mob to character
+        void recalculate();// calculate path for all mobs
+
+        void print_map(QPainter &painter);// print out the map
 
         bool lose();
         void show_losing_menu();
@@ -37,42 +42,45 @@ public:
         void show_win_menu();
 
 
-        void start_mobtimer();
-        void stop_mobtimer();
-        void setup_initial_pos();
+        void start_mobtimer();// start all mobs' timers
+        void stop_mobtimer();// stop all mob's timer
+        void setup_initial_pos();// setup initial position of charactaer
 
-        void setup_score();
-        void update_score();
+        void setup_score();//set up score
+        void update_score();// update scor
 
         bool on_map(Character &cha);
+        void show_menu();
 
 public slots:
 
-       void fall(Character &cha);
-       void mobfall(mobs &mob);
-       void mobs_go_around(mobs &mob);
+       void fall(Character &cha);// fall slot that reduces y cordinate of a character per mili sec
+       void mobfall(mobs &mob);// fall slot that reduces y cordinate of a mob per mili sec
+       void mobs_go_around(mobs &mob);// slot that excute the algorithm that controls mobs
 
-       void reset();
-       void next_lv();
-       void inactive(mobs &mob);
-       void respawn(int i , int j);
+       void reset();//reset
+       void next_lv();// go to next level
+       void inactive(mobs &mob); // make mob inactive
+       void respawn(int i , int j);// respawn mob
 private:
 
-       Character you;
-       QVector<mobs> mob;
+       Character you; // your character
+       QVector<mobs> mob; // enemies
 
-       map *gamemap;
-       QVector<QVector<ground>> cur_map;
+       map *gamemap;//gamemap
+       QVector<QVector<ground>> cur_map;//current map
 
-       long int score;
+       long int score;// score
 
 
-       QVector<QVector<int>> uppath;
-       QVector<QVector<int>> downpath;
-       QWidget *lose_menu;
-       QWidget *win_menu;
-       key_widget *key_menu;
-       QLabel * score_label;
+       QVector<QVector<int>> uppath;// graph that is used to search paths for mob from down to up
+       QVector<QVector<int>> downpath;// graph that is used to search paths for mob from up to down
+
+       //widget
+       QWidget *lose_menu;//lose menu
+       QWidget *win_menu;//win menu
+       key_widget *key_menu;// changing key
+       QLabel * score_label;// score label
 
 protected:
      void keyPressEvent(QKeyEvent *event) override;

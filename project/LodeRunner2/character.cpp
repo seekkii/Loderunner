@@ -39,6 +39,7 @@ Character::Character()
     x_cor = 0; y_cor = 0;
     direction = "RIGHT";
     life = 5;
+    set_type("ch");
 
     timer = new QTimer();
     inactive_timer = new QTimer();
@@ -53,6 +54,7 @@ Character::Character()
     ani_up.setname("up");
     ani_up.set_animate();
 }
+
 void Character::update_life(){
     life--;
 }
@@ -60,18 +62,20 @@ int Character::get_life(){
     return life;
 }
 
-float Character::x() const{
+int Character::x() const{
     return x_cor;
 }
 
-float Character::y() const{
+int Character::y() const{
     return y_cor;
 }
 
 
-void Character::set_pos(float x, float y){
-    this->x_cor = x;
-    this->y_cor = y;
+void Character::set_pos(int x, int y){
+    if (x>=0 && x < 900 && y>=0 && y <900){
+        this->x_cor = x;
+        this->y_cor = y;
+    }
 }
 
 
@@ -95,14 +99,7 @@ int Character::row(){
 }
 
 int Character::col(){
-    if (direction =="UP")
-        return trunc(y_cor/30);
-    else
-    if (direction == "DOWN")
-        return trunc(y_cor/30);
-    else{
-        return round(y_cor/30);
-    }
+    return trunc(y_cor/30);
 }
 
 QTimer* Character::get_timer(){
@@ -144,8 +141,6 @@ QPixmap Character::char_frame(){
 void Character::move_up(){
     set_pos(x_cor,y_cor-step);
     setdirection("UP");
-
-
 }
 void Character::move_down(){
     set_pos(x_cor,y_cor+step);

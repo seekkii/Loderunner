@@ -1,8 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <character.h>
 #include <QtUiTools>
+
 const int Height = 1000;
 const int Width = 1000;
 
@@ -25,8 +25,9 @@ public:
     void set_type(QString type);//type of ground diffrentiate by qstring
     QString get_type();//get type
     bool isground();
+    bool isnotground();
 
-    QTimer* get_respawntimer();
+    QTimer* get_respawntimer();//respawn timer
     bool is_digged();
     void set_digged(bool digged);
 
@@ -43,6 +44,7 @@ protected:
     bool digged;
 };//ground
 
+
 class bonus : public ground
 {
 public:
@@ -53,7 +55,7 @@ public:
         size.setWidth(30);
         type = "bn";
     }
-};
+};// Bonus is a type of ground
 
 class stair :public ground
 {
@@ -101,13 +103,13 @@ class map
 {
     public:
         friend class Character;
+
         map();
         int get_height();
         int get_width();
         QVector<QVector<ground>> get_map(int lv);
         void setup_map();
         void setup_from_readablemap(QVector<QVector<QString>> map, int lv);
-        void setup_initial_pos(Character &cha);
         int level(){
             return current_lv;
         };
@@ -116,20 +118,15 @@ class map
         }
         QVector<QVector<int>>griddownpath();
         QVector<QVector<int>>griduppath();
-
-
         QVector<QVector<int>> upgrid;
         QVector<QVector<int>> downgrid;
-         QVector<QVector<int>> getuppath(){
-             return upgrid;
-         }
-         QVector<QVector<int>> getdownpath(){
-             return downgrid;
-         }
+        QVector<QVector<int>> getuppath();
+        QVector<QVector<int>> getdownpath();
 
 
 
     private:
+
         QVector<QVector<ground>> current_map;
         QMap<int,QVector<QVector<ground>>> board;
         const int block_Height = 30;
@@ -138,6 +135,6 @@ class map
         int current_lv;
 
 
-};// map combines of grounds
+};// map combines of blocks(grounds)
 
 #endif // MAP_H

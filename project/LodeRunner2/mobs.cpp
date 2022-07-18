@@ -12,11 +12,8 @@ void mobs::set_holding(bool hold)
     this->hold = hold;
 }
 
-// A C++ Program to implement A* Search Algorithm
-
-
-
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//A* Search Algorithm
 // Creating a shortcut for int, int pair type
 
 // Creating a shortcut for pair<int, pair<int, int>> type
@@ -119,8 +116,7 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
     }// if destination or source is blocked return
 
     // If the destination cell is the same as source cell
-    if (isDestination(src.first, src.second, dest)
-        == true) {
+    if (isDestination(src.first, src.second, dest)) {
         return;
     }// if source == dest return
 
@@ -313,7 +309,6 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
                 // Set the Parent of the destination cell
                 cellDetails[i][j + 1].parent_i = i;
                 cellDetails[i][j + 1].parent_j = j;
-                printf("The destination cell is found\n");
                 tracePath(cellDetails, dest);
                 foundDest = true;
                 return;
@@ -362,7 +357,6 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
                 // Set the Parent of the destination cell
                 cellDetails[i][j - 1].parent_i = i;
                 cellDetails[i][j - 1].parent_j = j;
-                printf("The destination cell is found\n");
                 tracePath(cellDetails, dest);
                 foundDest = true;
                 return;
@@ -411,13 +405,11 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
     // reach the destination cell. This may happen when the
     // there is no way to destination cell (due to
     // blockages)
-    if (foundDest == false)
-        qDebug()<<("Failed to find the Destination Cell\n");
+
 
     return;
 }
 
-// Driver program to test above function
 void pathsearch::search(QVector<QVector<int>> grid,QPair<int,int> src, QPair<int,int> dest)
 {
     /* Description of the Grid-

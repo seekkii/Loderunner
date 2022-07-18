@@ -1,8 +1,5 @@
 #include "ui.h"
 #include <QKeyEvent>
-
-
-
 ui::ui(QWidget *parent)
     : QWidget(parent)
 {
@@ -13,12 +10,24 @@ ui::ui(QWidget *parent)
     setup_losing_menu();
     setup_wining_menu();
     key_menu = new key_widget(this);
+    key_menu->move(rect().center().x()/2, rect().center().y()/4);
 
     setup_game();
     setup_score();
-}
+}//constructor
+
+void ui::show_menu(){
+   if (lose()){
+      you.update_life();
+      show_losing_menu();
+   }
+   if (win()){
+      show_win_menu();
+   }
+}// showing menus
 
 void ui::setup_score(){
+    score = 0;
     score_label = new QLabel(QString::number(score), this);
     score_label->setStyleSheet("QLabel { background-color : red; color : blue; }");
     score_label->move(0, rect().center().y()*1.84);
@@ -28,7 +37,7 @@ void ui::setup_score(){
     QString level = " LEVEL "+QString::number(gamemap->level())+" ";
     score_label->setText("00000000"+life+level);
     score_label->show();
-}
+}//setup score board
 
 void ui::update_score(){
 
@@ -42,20 +51,23 @@ void ui::update_score(){
 
          }
 
-}
+}// update score board
+
 void ui::setup_initial_pos(){
     if (gamemap->level() == 1){
         you.set_pos(0,0);
-        mob[0].set_pos(340,200);
-          mob[1].set_pos(300,500);
-            mob[2].set_pos(140,500);
+        mob[0].set_pos(90,450);
+          mob[1].set_pos(300,450);
+            mob[2].set_pos(90,450);
 
     }
     if (gamemap->level() == 2){
         you.set_pos(300,300);
     }
 
-}
+}// setup initial position
+
+
 void ui::setup_losing_menu(){
     lose_menu = new QWidget();
     QPushButton *retry = new QPushButton("&retry ?",lose_menu);
@@ -63,7 +75,7 @@ void ui::setup_losing_menu(){
     QGridLayout *layout = new QGridLayout(lose_menu);
     retry->setFixedSize(100,40);
     layout->addWidget(retry,1,2);
-}
+}// retry menu
 
 void ui::setup_wining_menu(){
     win_menu = new QWidget();
@@ -72,16 +84,16 @@ void ui::setup_wining_menu(){
     QGridLayout *layout = new QGridLayout(win_menu);
     next_lv->setFixedSize(100,40);
     layout->addWidget(next_lv,1,2);
-}
+}// next level menu
 
 void ui::respawn(int i ,int j){
     if (cur_map[i][j].get_type()==""){
         cur_map[i][j].set_type("br");
+        cur_map[i][j].setpixmap(  QPixmap(":/images/map.jpg"));
         cur_map[i][j].set_digged(false);
-
     }
     update();
-}
+}// respawn block after being digged
 
 
 void ui::setup_game()
@@ -112,18 +124,18 @@ void ui::setup_game()
 
 
 
-}
+}// setup game
+
 void ui::inactive(mobs &mob){
 
-    cur_map[mob.row()][mob.col()].setpixmap(QPixmap(":/images/map.jpg"));
     mob.set_pos(mob.x(),mob.y()-gamemap->get_height());
-
+    cur_map[mob.row()][mob.col()+1].setpixmap(QPixmap((":/images/map.jpg")));
     mob.get_rand_timer()->start();
     mob.get_timer()->start();
-    recaculate(mob);
+    recalculate_path(mob);
     update();
 
-}
+} // make mob inactive when falled on the digged block
 void ui::start_mobtimer()
 {
     for (int i = 0 ; i < mob.size(); i++){
@@ -136,15 +148,16 @@ void ui::start_mobtimer()
         }
         mob[i].get_rand_timer()->start(100);
     }
-}
+}//start timer to run mobs_go_around slot
 
 void ui::stop_mobtimer()
 {
     for (int i = 0 ; i < mob.size(); i++){
         mob[i].get_timer()->stop();
         mob[i].get_rand_timer()->stop();
+        mob[i].get_inactivetimer()->stop();
     }
-}
+}// stop mobs's timers
 
 
 
@@ -164,37 +177,34 @@ void ui::print_map(QPainter &painter)
                 painter.setBrush(Qt::white);
                 int width = gamemap->get_width();
                 painter.drawLine(w+width,h,w,h);
-            }else{
+            }
 
-                if (cur_map[i][j].get_type() == "fg"){
-                    int x = round((you.x())/gamemap->get_width());
-                    int y = trunc(you.y()/gamemap->get_height());
-                    if ((x==i && y==j-1)||(x==i && y==j)){
-                        QPixmap pixmap(":/images/fake_ground.png");
-                        cur_map[i][j].setpixmap(pixmap);
-                    }
-                    painter.drawPixmap(r,cur_map[i][j].getpixmap());
+            if (cur_map[i][j].get_type() == "fg"){
+                int x = round((you.x())/gamemap->get_width());
+                int y = round(you.y()/gamemap->get_height());
+                if ((x==i && y==j)){
+                     QPixmap pixmap(":/images/fake_ground.png");
+                     cur_map[i][j].setpixmap(pixmap);
+                }
+                painter.drawPixmap(r,cur_map[i][j].getpixmap());
+            }
+
+            if (cur_map[i][j].get_type() == "bn"){
+                if (you.row()==i && you.col()==j){
+                    cur_map[i][j].set_type("");
+                       painter.drawPixmap(r,cur_map[i][j].getpixmap());
                 }
                 else{
-                    if (cur_map[i][j].get_type() == "bn"){
-                        if (you.row()==i && you.col()==j){
-                             cur_map[i][j].set_type("");
-                             painter.drawPixmap(r,cur_map[i][j].getpixmap());
+                    painter.drawPixmap(r,cur_map[i][j].getpixmap());
+                }
+            }
+            else
+                if (cur_map[i][j].get_type() != "")
+                    painter.drawPixmap(r,cur_map[i][j].getpixmap());
+        }
 
-                        }
-                        else{
-                             painter.drawPixmap(r,cur_map[i][j].getpixmap());
-                        }
-                    }
-                    else
-                        if (cur_map[i][j].get_type() != "")
-                            painter.drawPixmap(r,cur_map[i][j].getpixmap());
+}//Running through the string representation of map and print block according to their type
 
-                 }
-              }
-        }//print map
-
-}
 void ui::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -216,99 +226,92 @@ void ui::paintEvent(QPaintEvent *)
     for (int i = 0; i < mob.size();i++){
         auto r_mob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(30,30)};
         painter.drawEllipse(r_mob);
-
-
-
-     }
-    for (int i = 0; i < mob.size(); i++){
-        if (falling(mob[i]) && !mob[i].get_inactivetimer()->isActive()){
-            mob[i].get_timer()->start(100);
-        }
-        else {
-            mob[i].get_timer()->stop();//if mob falling check is true start timer to call fall slot
-        }
-        if(cur_map[mob[i].row()][mob[i].col()].get_type() == "bn" && mob[i].holding() == false){
-            cur_map[mob[i].row()][mob[i].col()].set_type("");
-            mob[i].set_holding(true);
-        }
-        if (!mob[i].mobpath.isEmpty()){
-
-            QPair<int,int> youpos(you.col(),you.row());
-            if (mob[i].mobpath.back()!=youpos)
-                recaculate(mob[i]);
-        }
     }
-     if (falling(you)){
+
+    //if your cha is falling, start timer
+    if (falling(you)){
          you.get_timer()->start(100);
-     }
-     else{
+    }
+    else{
          you.get_timer()->stop();
-     } //if your char falling check is true start timer to call fall slot
+    } //if your char falling check is true start timer to call fall slot
 
-
+    qDebug()<< mob[1].x() << mob[1].y();
 
 
 
 
 }
 
-void ui::recaculate(mobs &mob){
+void ui::recalculate_path(mobs &mob){
 
     QVector<QVector<int>> grid;
-    if (mob.col() > you.col()){
+    if (mob.col() >= you.col()){
             grid = uppath;
     }
     else{
             grid = downpath;
     }
-          QPair<int,int> src(ceil(mob.y()/30), mob.row());
-          QPair<int,int> dest;
-          dest = QPair<int,int> (you.col(), you.row());
+          QPair<int,int> src(round(mob.y()/30), mob.row());
+          QPair<int,int> dest(you.col(), you.row());
+          if (grid[you.col()][you.row()] == 0){
+              for (int i = you.row();i < grid.size() ;i++)
+              {
+                  bool terminate = false;
+                  for (int j = you.col(); j < grid[0].size();j++)
+                  {
+                      if (grid[i][j] == 1){
+                          dest = QPair<int,int>(i,j);
+                          terminate = true;
+                          break;
+                      }
+                  }
+                  if (terminate){
+                      break;
+                  }
+              }
+          }
+
           pathsearch path;
           path.search(grid,src,dest);
           mob.mobpath = path.getpathlist();
 
+          QPair<int,int> youpos(you.col(),you.row());
 
-}// recalculate path from mob to your character
+}// recalculate a path from mob to your character
 
+void ui::recalculate(){
+   for (int i = 0 ; i < mob.size(); i++)
+   {
+        recalculate_path(mob[i]);
+    }
+}// recalculate a path for all the mobs
 
 
 bool ui::falling(Character &cha)
 {
-
     int i = cha.row();
-    int j = cha.col();
-    if(cur_map[i][j].get_type() == "ro"){
-     return false;
+    int j = (cha.col());
+
+    if(cur_map[i][j].get_type() == "ro" || cur_map[i][j].get_type()=="st"){
+        return false;
     }
-    if(cur_map[i][j+1].get_type()=="" ||cur_map[i][j+1].get_type()=="fg" || cur_map[i][j+1].get_type()=="bn"
-           ){
+
+
+
+    if (cur_map[i][j+1].isnotground() && cha.x()%30 == 0){
             return true;
-    }
-    else{
+    }else
+        {
 
             return false;
         }
-}
+
+
+}//check if cha is falling
+
 void ui::fall(Character &cha)
 {
-    cha.move_down();
-    if (!falling(cha))
-    {
-        for (int i = 0 ; i < mob.size(); i++)
-           {
-            recaculate(mob[i]);
-
-        }
-
-    }
-
-
-
-    if (lose()){
-        lose_menu->show();
-    }
-    update_score();
 
     int i = you.row();
     int j = you.col();
@@ -316,9 +319,10 @@ void ui::fall(Character &cha)
         score+=500;
         cur_map[i][j].set_type("");
     }
-
+    update_score();
+    cha.move_down();
     update();
-}// reduce cha 's y cordinate by fall_per_milisec
+}// if cha is falling, call this slot which will reduce cha 's y cordinate by fall_per_milisec
 
 
 void ui::mousePressEvent(QMouseEvent *event)
@@ -328,7 +332,7 @@ void ui::mousePressEvent(QMouseEvent *event)
         key_menu->hide();
         start_mobtimer();
     }
-}
+}//mouse press to exit key menu
 
 void ui::keyPressEvent(QKeyEvent *event)
 {
@@ -339,23 +343,26 @@ void ui::keyPressEvent(QKeyEvent *event)
      if(falling(you)){
          return;
      }
-     if(event->key() == key_map["UP"]&&(!is_object(x,y-dis))){
+     if(event->key() == key_map["UP"]&&
+        (cur_map[x/30][ceil(y/30)].get_type() == "st")) {
                you.move_up();
-     }
+     }// if up key is pressed
      if(event->key() == key_map["DOWN"]&&(!floor_check(x,y+dis))){
              you.move_down();
-     }
+
+     }// if down key is pressed
      if(event->key() == key_map["RIGHT"]&&(!is_object(x+dis,y))){
             you.move_right();
 
-     }
+     }// if right key is pressed
      if(event->key() == key_map["LEFT"]&&(!is_object(x-dis,y))){
            you.move_left();
-     }
+     }// if left key is pressed
      if(event->key() == key_map["DIG"]){
-           if ((!is_object(x+dis,y))){
-                        int i = you.row()+1;
-                        int j = you.col()+1;
+         int i = you.row()+1;
+         int j = you.col()+1;
+           if ((!is_object(x+dis,y)) && !cur_map[i][j].is_digged()){
+
                         if (cur_map[i][j].get_type() == "br"){
                             cur_map[i][j].set_type("");
                             cur_map[i][j].set_digged(true);
@@ -365,7 +372,12 @@ void ui::keyPressEvent(QKeyEvent *event)
 
                         }
             }
-      }
+      }// if dig key is pressed
+
+     if(event->key() == Qt::Key_Shift&& !key_menu->isVisible()){
+        key_menu->show();
+        stop_mobtimer();
+     }//menu key
 
       int i = you.row();
       int j = you.col();
@@ -373,28 +385,19 @@ void ui::keyPressEvent(QKeyEvent *event)
           score+=500;
           cur_map[i][j].set_type("");
       }
+      update_score();
+
+      if (x/30!=i||y/30!=j){
+          recalculate();
+      }
 
         //everytime character position change
-
-
-      update_score();
       update();
 
 
-      if (lose()){
-         you.update_life();
-         show_losing_menu();
-      }
-      if (win()){
-         show_win_menu();
-      }
 
 
-      if(event->key() == Qt::Key_Shift&& !key_menu->isVisible()){
-         key_menu->move(rect().center().x()/2, rect().center().y()/4);
-         key_menu->show();
-         stop_mobtimer();
-      }
+
 
 
 
@@ -406,18 +409,17 @@ bool ui::on_map(Character &cha){
             && (cha.col() < cur_map[cur_map.size()].size());
 }
 
-bool ui::is_object(float x, float y)
+bool ui::is_object(int x, int y)
 {
-
-    int i = trunc((x)/gamemap->get_width());
+    int i = round((x)/gamemap->get_width());
     int j = round(y/gamemap->get_height());
 
-        if(cur_map[i][j].get_type() == "br"){
+    if(cur_map[i][j].get_type() == "br" ){
             return true;
-        }
-        else{
+    }
+    else{
             return false;
-        }
+    }
 
 }//check if position i,j is of type br(brick), return true if it is and false in other cases("ro"(rope),"st"(stair))
 
@@ -450,7 +452,12 @@ bool ui::is_bonus(float x, float y){
 
 void ui::mobfall(mobs &mob)
 {
-
+    if (!falling(mob)&&!cur_map[mob.row()][mob.col()].is_digged()){
+        mob.get_timer()->stop();
+        mob.get_rand_timer()->start();
+        recalculate_path(mob);
+        return;
+    }
     if (cur_map[mob.row()][mob.col()].is_digged()){
         if (mob.holding()){
             bonus coin(gamemap->get_width()*mob.row(),gamemap->get_height()*mob.col());
@@ -463,7 +470,7 @@ void ui::mobfall(mobs &mob)
         mob.get_rand_timer()->stop();
         mob.get_inactivetimer()->start(5000);
         cur_map[mob.row()][mob.col()].set_type("br");
-         cur_map[mob.row()][mob.col()].setpixmap(QPixmap());
+        cur_map[mob.row()][mob.col()].setpixmap(QPixmap());
     }
     else{
         mob.move_down();
@@ -471,48 +478,74 @@ void ui::mobfall(mobs &mob)
     update();
 }// reduce mob's y cordinate by fall_per_milisec
 
+bool ui::is_mob(float x, float y){
+    bool is_mob = false;
+    for (int i = 0 ; i < this->mob.size();i++){
+        double dis = sqrt( (x-this->mob[i].x()) * (x-this->mob[i].x()) + (y-this->mob[i].y()) * (y-this->mob[i].y()));
+        if (dis>10 && dis<30){
+            is_mob = true;
+            break;
+        }
+    }
+    return is_mob;
+}
+
 void ui::mob_action(mobs &mob)
 {
-    if (falling(mob) ){
+    if(cur_map[mob.row()][mob.col()].get_type() == "bn" && mob.holding() == false){
+            cur_map[mob.row()][mob.col()].set_type("");
+            mob.set_holding(true);
+    }
+    if (falling(mob)){
+        mob.get_timer()->start(100);
         return;
     }
+
     if (mob.mobpath.isEmpty()){
         return;
     }
+
     if(mob.x()== mob.mobpath.front().second*30 && mob.y()== mob.mobpath.front().first*30){
        mob.mobpath.dequeue();
     }
+    int dis = mob.get_walkstepdis();
+
     if (mob.mobpath.size() != 0){
-        if(mob.x()< mob.mobpath.front().second*30){
+
+        if(mob.x()< mob.mobpath.front().second*30 && !is_object(mob.x()+dis,mob.y()) && !is_mob(mob.x()+dis,mob.y())){
             mob.move_right();
             return;
         }
-        if(mob.x() > mob.mobpath.front().second*30){
+        if(mob.x() > mob.mobpath.front().second*30 &&!is_object(mob.x()-dis,mob.y()) && !is_mob(mob.x()-dis,mob.y())){
             mob.move_left();
             return;
         }
-        if(mob.y()> mob.mobpath.front().first*30){
+        if(mob.y()> mob.mobpath.front().first*30 && !is_object(mob.x(),mob.y()-dis)  && !is_mob(mob.x(),mob.y()-dis)){
             mob.move_up();
             return;
         }
-        if(mob.y()< mob.mobpath.front().first*30){
+        if(mob.y()< mob.mobpath.front().first*30 && !is_object(mob.x(),mob.y()+dis)  && !is_mob(mob.x(),mob.y()+dis)){
             mob.move_down();
             return;
         }
 
     }
+    // everytime character's position is changed, recalculate the path
 
 
+   show_menu();
    update();
 
 
-}
+}// algorithm to control mobs
 
 void ui::mobs_go_around(mobs &mob)
 {
     mob_action(mob);
     update();
 }//slot that performs mob_action() for corresponding mob
+
+
 
 
 bool ui::lose()
@@ -561,22 +594,20 @@ void ui::show_win_menu()
     win_menu->show();
 }
 
-
-
-
-void ui::reset()
-{
-    for (int i = 0 ; i < mob.size(); i++){
-       mob[i].get_rand_timer()->start(100);
-    }
-    setup_initial_pos();
-    update();
+void ui::reset(){
     lose_menu->close();
     you.update_life();
-}
+    you.get_timer()->start();
+    start_mobtimer();
+    setup_initial_pos();
+    cur_map = gamemap->get_map(gamemap->level());
+    for (int i = 0 ; i < mob.size(); i++){
+        mob[i].set_holding(false);
+    }
+    update();
+}//reset everything
 
-void ui::next_lv()
-{
+void ui::next_lv(){
     gamemap->set_level(gamemap->level()+1);
     cur_map = gamemap->get_map(gamemap->level());
     uppath = gamemap->griduppath();
@@ -586,7 +617,7 @@ void ui::next_lv()
     setup_initial_pos();
     update();
     win_menu->close();
-}
+} //go to next level
 
 
 

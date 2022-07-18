@@ -2,7 +2,6 @@
 #include <QTimer>
 ground::ground()
 {}
-
 ground::ground(float x, float y)
 {
     QPixmap pixmap(":/images/map.jpg");
@@ -18,7 +17,11 @@ ground::ground(float x, float y)
 }
 
 bool ground::isground(){
-    return (type == "br"||type =="st"||type=="rope");
+    return (type == "br"||type =="st");
+}
+
+bool ground::isnotground(){
+    return (type == ""||type =="bn"||type=="fg"||type=="ro");
 }
 QTimer* ground::get_respawntimer(){
     return respawn;
@@ -95,6 +98,14 @@ int map::get_height()
     return block_Width;
 }// return the corresponding ratio between position on board and on screen of the height
 
+QVector<QVector<int>> map::getuppath(){
+     return upgrid;
+}
+QVector<QVector<int>> map::getdownpath(){
+     return downgrid;
+}
+
+
 
 
 void map::setup_map()
@@ -103,11 +114,11 @@ void map::setup_map()
      QVector<QVector<QString>> map_1
      {
          {"  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  "},
-         {"  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  "},
-         {"br","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
-         {"br","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
-         {"br","st","  ","  ","  ","  ","  ","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
-         {"br","br","br","br","br","br","br","br","br","br","br","st","ro","ro","ro","ro","ro","ro","st","  ","  ","  ","  ","br"},
+         {"  ","ro","  ","  ","ro","ro","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  ","  "},
+         {"br","  ","br","br","  ","  ","st","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+         {"br","  ","br","  ","  ","  ","st","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+         {"br","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","st","  ","  ","br","  ","  ","  ","  ","  ","  ","  ","  ","br"},
+         {"br","br","br","br","br","br","st","br","br","br","br","st","ro","ro","ro","ro","ro","ro","st","  ","  ","  ","  ","br"},
          {"br","  ","  ","  ","  ","br","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","br"},
          {"br","  ","  ","  ","  ","br","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","  ","  ","st","  ","  ","  ","  ","fg"},
          {"  ","  ","  ","br","br","br","br","br","br","br","br","br","br","br","br","br","br","br","st","br","br","br","br","br"},
@@ -153,43 +164,44 @@ void map::setup_map()
       setup_from_readablemap(map_2,2);
 
 }
+
 QVector<QVector<int>> map::griddownpath(){
     QVector<QVector<int>> grid;
    grid = griduppath();
-   for (int i = 0 ; i <grid.size() ;i++)
-       for (int j = 1 ; j <grid[grid.size()-1].size()-1; j++)
-   {
-           if(grid[i][j] == 1 && grid[i][j+1] == 0 && current_map[j+1][i].get_type()!="br"){
-              for (int down = i; down<grid.size();down++){
 
-                  if (grid[down][j+1]==1){
+   for (int i = 0 ; i <grid.size() ;i++)
+       for (int j = 0 ; j <grid[grid.size()-1].size()-1; j++)
+       {
+             if(grid[i][j] == 1 && current_map[j+1][i].get_type()!="br" && current_map[j+1][i+1].get_type()=="")
+
+               for (int down = i; down<grid.size();down++){
+                  if (current_map[j+1][down].get_type()=="br"){
                       break;
                   }
                   else{
-                      grid[down][j+1] = 2;
+                      grid[down][j+1] = 1;
                   }
               }
+       }
 
-           }
-           if(grid[i][j] == 1 && grid[i][j-1] == 0  && current_map[j-1][i].get_type()!="br"){
+   for (int i = 0 ; i <grid.size() ;i++)
+       for (int j = 1 ; j <grid[grid.size()-1].size()-1; j++)
+       {
+             if(grid[i][j] == 1 && current_map[j-1][i].get_type()!="br" && current_map[j-1][i+1].get_type()=="")
+
                for (int down = i; down<grid.size();down++){
+                  if (current_map[j-1][down].get_type()=="br"){
+                      break;
+                  }
+                  else{
+                      grid[down][j-1] = 1;
+                  }
+              }
+       }
 
-                   if (grid[down][j-1]==1){
-                       break;
-                   }
-                   else{
-                       grid[down][j-1] = 2;
-                   }
-               }
 
-            }
 
-    }
-   for (int i = 0 ; i < grid.size(); i++){
-       for (int j = 0 ; j < grid[0].size();j++)
-       if (grid[i][j] == 2)
-           grid[i][j] = 1;
-   }
+
 
     return grid;
 }
@@ -215,8 +227,8 @@ QVector<QVector<int>> map::griduppath(){
 
 void map::setup_from_readablemap(QVector<QVector<QString>> map, int lv)
 {
-      current_map.clear();
-    current_map.resize(map[map.size()-1].size(), QVector<ground>(map.size()));
+    current_map.clear();
+    current_map.resize(map[map.size()-1].size(), QVector<ground>(map.size()+1));
     for (int i = 0; i < map[map.size()-1].size(); i ++){
          for (int j = 0; j < map.size(); j ++){
             if (map[j][i] == "br"){
