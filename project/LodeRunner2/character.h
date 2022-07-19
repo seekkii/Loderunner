@@ -25,6 +25,7 @@ class Character :public ground
 {
 public:
     Character();// constructor
+    Character(int x, int y);// constructor
 
     int x() const;// return x cordinate
     int y() const;//return y cordinate

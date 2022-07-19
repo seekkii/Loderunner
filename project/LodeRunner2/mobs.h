@@ -33,6 +33,7 @@ class mobs :public Character
 
     }
 
+
     void set_holding(bool hold);
     bool holding();
 
@@ -43,6 +44,8 @@ class mobs :public Character
     QQueue<QPair<int, int>> mobpath;
 
 };
+
+
 class pathsearch
 {
     public:

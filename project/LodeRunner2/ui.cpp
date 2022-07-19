@@ -22,7 +22,14 @@ void ui::show_menu(){
       show_losing_menu();
    }
    if (win()){
-      show_win_menu();
+       qDebug()<< score;
+      for (int i = 0 ; i < 10;i++)
+          {
+              stair stai_r(30*8,30*i);
+              cur_map[8][i] = stai_r;
+          }
+      update();
+
    }
 }// showing menus
 
@@ -54,16 +61,75 @@ void ui::update_score(){
 }// update score board
 
 void ui::setup_initial_pos(){
+    //mob
+
     if (gamemap->level() == 1){
         you.set_pos(0,0);
+        mob.resize(3);
+        for (int i = 0; i < mob.size(); i++)
+        {
+             mobs new_mob;
+             mob[i] = new_mob;
+             mob[i].mobpath.resize(3);
+        }// generate new vector of mobs
+
         mob[0].set_pos(90,450);
-          mob[1].set_pos(300,450);
-            mob[2].set_pos(90,450);
+        mob[1].set_pos(300,450);
+        mob[2].set_pos(90,450);
+
 
     }
     if (gamemap->level() == 2){
-        you.set_pos(300,300);
+        you.set_pos(0,0);
+        mob.resize(5);
+        for (int i = 0; i < mob.size(); i++)
+        {
+             mobs new_mob;
+             mob[i] = new_mob;
+             mob[i].mobpath.resize(3);
+
+
+        }// generate new vector of mobs
+
+       mob[0].set_pos(90,450);
+       mob[1].set_pos(150,450);
+       mob[2].set_pos(90,480);
+       mob[3].set_pos(60,120);
+       mob[4].set_pos(150,380);
+
     }
+
+    if (gamemap->level() == 3){
+        mob.resize(7);
+        for (int i = 0; i < mob.size(); i++)
+        {
+             mobs new_mob;
+             mob[i] = new_mob;
+
+
+        }// generate new vector of mobs
+       you.set_pos(0,0);
+       mob[0].set_pos(90,450);
+       mob[1].set_pos(300,450);
+       mob[2].set_pos(90,450);
+       mob[3].set_pos(70,350);
+       mob[4].set_pos(150,250);
+       mob[5].set_pos(90,150);
+       mob[6].set_pos(90,650);
+
+
+    }
+
+    for (int i = 0; i < mob.size(); i++)
+    {
+         mob[i].mobpath.resize(3);
+         connect(mob[i].get_rand_timer(),  &QTimer::timeout, this, [i,this]{ mobs_go_around(mob[i]); });
+         connect(mob[i].get_timer(),  &QTimer::timeout, this, [i,this]{ mobfall(mob[i]); });
+         connect(mob[i].get_inactivetimer(),&QTimer::timeout, this, [i,this]{ inactive(mob[i]); });
+         mob[i].get_rand_timer()->start(100);
+    }// generate new vector of mobs
+
+
 
 }// setup initial position
 
@@ -104,21 +170,13 @@ void ui::setup_game()
     uppath = gamemap->griduppath();
     downpath = gamemap->griddownpath();
 
-    //mob
-    mob.resize(3);
-    for (int i = 0; i < mob.size(); i++)
-    {
-         mobs new_mob;
-         mob[i] = new_mob;
-         mob[i].mobpath.resize(3);
 
-    }// generate new vector of mobs
     setup_initial_pos();
     connect(you.get_timer(),  &QTimer::timeout, this, [this]{ fall(you); });
     for (int i = 0 ; i < mob.size(); i++){
         connect(mob[i].get_rand_timer(),  &QTimer::timeout, this, [i,this]{ mobs_go_around(mob[i]); });
         connect(mob[i].get_timer(),  &QTimer::timeout, this, [i,this]{ mobfall(mob[i]); });
-        connect(mob[i].get_inactivetimer(),&QTimer::timeout, this, [i,this]{ inactive(mob[i]); }); 
+        connect(mob[i].get_inactivetimer(),&QTimer::timeout, this, [i,this]{ inactive(mob[i]); });
         mob[i].get_rand_timer()->start(100);
     }//connect mobs timer to fall() slot for fall animation
 
@@ -139,13 +197,7 @@ void ui::inactive(mobs &mob){
 void ui::start_mobtimer()
 {
     for (int i = 0 ; i < mob.size(); i++){
-        if (!mob[i].on_map())
-        {
-            mob[i].set_pos(100,100);
-        }
-        if (!floor_check(mob[i].x(),mob[i].y())){
                 mob[i].get_timer()->start(100);
-        }
         mob[i].get_rand_timer()->start(100);
     }
 }//start timer to run mobs_go_around slot
@@ -236,9 +288,6 @@ void ui::paintEvent(QPaintEvent *)
          you.get_timer()->stop();
     } //if your char falling check is true start timer to call fall slot
 
-    qDebug()<< mob[1].x() << mob[1].y();
-
-
 
 
 }
@@ -299,7 +348,7 @@ bool ui::falling(Character &cha)
 
 
 
-    if (cur_map[i][j+1].isnotground() && cha.x()%30 == 0){
+    if (cur_map[i][j+1].isnotground()){
             return true;
     }else
         {
@@ -314,13 +363,15 @@ void ui::fall(Character &cha)
 {
 
     int i = you.row();
-    int j = you.col();
+    int j = floor(cha.y()/30)+1;
+    cha.move_down();
+
     if (cur_map[i][j].get_type() == "bn"){
         score+=500;
         cur_map[i][j].set_type("");
     }
+
     update_score();
-    cha.move_down();
     update();
 }// if cha is falling, call this slot which will reduce cha 's y cordinate by fall_per_milisec
 
@@ -390,7 +441,10 @@ void ui::keyPressEvent(QKeyEvent *event)
       if (x/30!=i||y/30!=j){
           recalculate();
       }
-
+      show_menu();
+      if (you.col() == 0 && win()){
+          show_win_menu();
+      }
         //everytime character position change
       update();
 
@@ -533,7 +587,7 @@ void ui::mob_action(mobs &mob)
     // everytime character's position is changed, recalculate the path
 
 
-   show_menu();
+
    update();
 
 
@@ -575,10 +629,12 @@ void ui::show_losing_menu(){
 }
 
 bool ui::win(){
-    if (you.row()>22||you.col()>22)
+    if (score == 500*(gamemap->level()+2)){
         return true;
-    else
+    }
+    else {
         return false;
+    }
 }//case of losing
 
 
@@ -598,12 +654,13 @@ void ui::reset(){
     lose_menu->close();
     you.update_life();
     you.get_timer()->start();
-    start_mobtimer();
+
     setup_initial_pos();
     cur_map = gamemap->get_map(gamemap->level());
     for (int i = 0 ; i < mob.size(); i++){
         mob[i].set_holding(false);
     }
+    recalculate();
     update();
 }//reset everything
 
@@ -612,9 +669,9 @@ void ui::next_lv(){
     cur_map = gamemap->get_map(gamemap->level());
     uppath = gamemap->griduppath();
     downpath = gamemap->griddownpath();
-
-    start_mobtimer();
     setup_initial_pos();
+    recalculate();
+
     update();
     win_menu->close();
 } //go to next level

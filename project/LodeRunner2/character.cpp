@@ -31,7 +31,6 @@ void animation::increase_counts()
     }
 }
 
-
 Character::Character()
 {
     size = QSize(20,30);
