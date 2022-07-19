@@ -12,7 +12,8 @@ class animation
         void setname(QString name);
         QString getname();
         void increase_counts();
-        void set_animate();
+        void set_animate(int amount);
+        void set_mob_animate(int amount);
         QPixmap current_frame();
         QVector<QPixmap> animate;
         int animationcount;

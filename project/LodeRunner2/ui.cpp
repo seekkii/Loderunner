@@ -267,17 +267,21 @@ void ui::paintEvent(QPaintEvent *)
     print_map(painter);
      auto r = QRect{QPoint(you.x(),you.y()), QSize(30,30)};//rectangle that has center of your char to print pixmap from
 
-    painter.setPen(Qt::blue);
-    painter.setBrush(Qt::blue);
-    painter.drawRect(r);
+    painter.drawPixmap(r,you.char_frame());
 
 
     //print mobs
     painter.setPen(Qt::red);
     painter.setBrush(Qt::red);
+    QRect rmob;
     for (int i = 0; i < mob.size();i++){
-        auto r_mob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(30,30)};
-        painter.drawEllipse(r_mob);
+        if (mob[i].getdirection() == "UP" || mob[i].getdirection() == "DOWN"){
+            rmob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(34,33)};
+        }
+        else{
+            rmob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(30,30)};
+        }
+        painter.drawPixmap(rmob,mob[i].char_frame());
     }
 
     //if your cha is falling, start timer

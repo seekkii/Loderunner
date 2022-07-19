@@ -8,13 +8,27 @@ void animation::setname(QString name){
 QString animation::getname(){
     return name;
 }
-void animation::set_animate()
+void animation::set_animate(int amount)
 {
     animationcount = 0;
-    animate.resize(3);
+    animate.resize(amount);
     for (int i = 0; i < animate.size();i++){
-        filename = "C:/Users/Umi/Pictures/Screenshots/"+name+QString::number(i)+".png";
+        filename = ":/animation/animated/"+name+QString::number(i)+".png";
+
         animate[i] = QPixmap(filename);
+
+    }
+}
+
+void animation::set_mob_animate(int amount)
+{
+    animationcount = 0;
+    animate.resize(amount);
+    for (int i = 0; i < animate.size();i++){
+        filename = ":/animation/animated/enemy"+name+QString::number(i)+".png";
+
+        animate[i] = QPixmap(filename);
+
     }
 }
 
@@ -45,13 +59,13 @@ Character::Character()
     inactive_timer->setSingleShot(true);
 
     ani_right.setname("right");
-    ani_right.set_animate();
+    ani_right.set_animate(3);
     ani_left.setname("left");
-    ani_left.set_animate();
+    ani_left.set_animate(3);
     ani_down.setname("down");
-    ani_down.set_animate();
+    ani_down.set_animate(1);
     ani_up.setname("up");
-    ani_up.set_animate();
+    ani_up.set_animate(2);
 }
 
 void Character::update_life(){
@@ -140,10 +154,12 @@ QPixmap Character::char_frame(){
 void Character::move_up(){
     set_pos(x_cor,y_cor-step);
     setdirection("UP");
+    ani_up.increase_counts();
 }
 void Character::move_down(){
     set_pos(x_cor,y_cor+step);
     setdirection("DOWN");
+
 }
 
 
@@ -156,7 +172,7 @@ void Character::move_right(){
 void Character::move_left(){
     set_pos(x_cor-step,y_cor);
     setdirection("LEFT");
-
+    ani_left.increase_counts();
 }
 
 

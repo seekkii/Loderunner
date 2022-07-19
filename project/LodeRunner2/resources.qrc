@@ -14,15 +14,25 @@
         <file>coins.png</file>
     </qresource>
     <qresource prefix="/animation">
-        <file>right0.png</file>
-        <file>right1.png</file>
-        <file>right2.png</file>
-        <file>right3.png</file>
-        <file>right4.png</file>
-        <file>C:/Users/Umi/Pictures/Screenshots/right0.png</file>
-        <file>C:/Users/Umi/Pictures/Screenshots/right1.png</file>
-        <file>C:/Users/Umi/Pictures/Screenshots/right2.png</file>
-        <file>C:/Users/Umi/Pictures/Screenshots/right3.png</file>
-        <file>C:/Users/Umi/Pictures/Screenshots/right4.png</file>
+        <file>animated/left0.png</file>
+        <file>animated/left1.png</file>
+        <file>animated/left2.png</file>
+        <file>animated/right0.png</file>
+        <file>animated/right1.png</file>
+        <file>animated/right2.png</file>
+        <file>animated/down0.png</file>
+        <file>animated/original.png</file>
+        <file>animated/up0.png</file>
+        <file>animated/up1.png</file>
+        <file>animated/enemyleft0.png</file>
+        <file>animated/enemyleft1.png</file>
+        <file>animated/enemyright1.png</file>
+        <file>animated/enemyright2.png</file>
+        <file>animated/enemyup0.png</file>
+        <file>animated/enemyup1.png</file>
+        <file>animated/enemydown0.png</file>
+        <file>animated/enemydown1.png</file>
+        <file>animated/enemyleft2.png</file>
+        <file>animated/enemyright0.png</file>
     </qresource>
 </RCC>

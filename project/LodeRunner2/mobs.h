@@ -25,13 +25,7 @@ class mobs :public Character
 {
     public:
 
-    mobs():Character()
-    {
-        QPixmap pixmap(":/images/yourchar.png");
-        rand_timer = new QTimer();
-        hold = false;
-
-    }
+    mobs();
 
 
     void set_holding(bool hold);

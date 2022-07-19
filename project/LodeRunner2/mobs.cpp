@@ -1,4 +1,14 @@
 #include "mobs.h"
+
+mobs::mobs()
+{
+    rand_timer = new QTimer();
+    hold = false;
+    ani_right.set_mob_animate(3);
+    ani_left.set_mob_animate(3);
+    ani_down.set_mob_animate(2);
+    ani_up.set_mob_animate(2);
+}
 QTimer* mobs::get_rand_timer(){
     return rand_timer;
 }
@@ -11,6 +21,8 @@ void mobs::set_holding(bool hold)
 {
     this->hold = hold;
 }
+
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //A* Search Algorithm

@@ -134,16 +134,26 @@ compiler_rcc_clean:
 	-$(DEL_FILE) release\qrc_resources.cpp
 release/qrc_resources.cpp: ../LodeRunner2/resources.qrc \
 		C:/Qt/6.2.0/mingw81_64/bin/rcc.exe \
-		../LodeRunner2/right4.png \
-		../LodeRunner2/right0.png \
-		../LodeRunner2/right1.png \
-		../LodeRunner2/right2.png \
-		../LodeRunner2/right3.png \
-		C:/Users/Umi/Pictures/Screenshots/right4.png \
-		C:/Users/Umi/Pictures/Screenshots/right0.png \
-		C:/Users/Umi/Pictures/Screenshots/right1.png \
-		C:/Users/Umi/Pictures/Screenshots/right2.png \
-		C:/Users/Umi/Pictures/Screenshots/right3.png \
+		../LodeRunner2/animated/right0.png \
+		../LodeRunner2/animated/enemyright1.png \
+		../LodeRunner2/animated/right2.png \
+		../LodeRunner2/animated/down0.png \
+		../LodeRunner2/animated/enemyup0.png \
+		../LodeRunner2/animated/enemyleft0.png \
+		../LodeRunner2/animated/left2.png \
+		../LodeRunner2/animated/up0.png \
+		../LodeRunner2/animated/enemyleft2.png \
+		../LodeRunner2/animated/left1.png \
+		../LodeRunner2/animated/right1.png \
+		../LodeRunner2/animated/enemyright0.png \
+		../LodeRunner2/animated/enemyleft1.png \
+		../LodeRunner2/animated/up1.png \
+		../LodeRunner2/animated/enemyup1.png \
+		../LodeRunner2/animated/enemydown1.png \
+		../LodeRunner2/animated/left0.png \
+		../LodeRunner2/animated/enemyright2.png \
+		../LodeRunner2/animated/enemydown0.png \
+		../LodeRunner2/animated/original.png \
 		../LodeRunner2/string.png \
 		../LodeRunner2/yourchar.png \
 		../LodeRunner2/coins.png \
