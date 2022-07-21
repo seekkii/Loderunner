@@ -10,14 +10,7 @@
 #define COL 23
 #define FLT_MAX 1e5
 
-// A structure to hold the necessary parameters
-struct cell {
-    // Row and Column index of its parent
-    // Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
-    int parent_i, parent_j;
-    // f = g + h
-    double f, g, h;
-};
+
 
 
 
@@ -26,19 +19,31 @@ class mobs :public Character
     public:
 
     mobs();
-
-
     void set_holding(bool hold);
     bool holding();
 
 
-    QTimer *rand_timer;
+    QTimer* get_inactivetimer();
     QTimer* get_rand_timer();
+
+
+    QTimer *rand_timer;
+    QTimer* inactive_timer;
     bool hold;
     QQueue<QPair<int, int>> mobpath;
 
 };
 
+
+struct cell {
+    // row and column index of parent
+    int parent_i, parent_j;
+    // f = g + h
+    double f, g, h;
+};
+
+// Struct for pair<int, pair<int, int>> type
+typedef QPair<double, QPair<int, int> > pPair;
 
 class pathsearch
 {

@@ -22,7 +22,7 @@ class animation
 };
 
 
-class Character :public ground
+class Character
 {
 public:
     Character();// constructor
@@ -51,11 +51,12 @@ public:
     QSize getSize();//get size of pixmap/your char
     void setSize(int h, int w);//set size of~
     QTimer* get_timer();//get timer of character
-    QTimer* get_inactivetimer();
+
     QPixmap char_frame();
 
     int get_life();
     void update_life();
+
 
 protected:
     float x_cor;
@@ -70,7 +71,7 @@ protected:
 
     QSize size;
     QTimer *timer;
-    QTimer* inactive_timer;
+
 };
 
 

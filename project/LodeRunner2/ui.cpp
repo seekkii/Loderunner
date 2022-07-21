@@ -183,8 +183,8 @@ void ui::inactive(mobs &mob){
 
     mob.set_pos(mob.x(),mob.y()-gamemap->get_height());
     cur_map[mob.row()][mob.col()+1].setpixmap(QPixmap((":/images/map.jpg")));
-    mob.get_rand_timer()->start();
-    mob.get_timer()->start();
+    mob.get_rand_timer()->start(100);
+
     recalculate_path(mob);
     update();
 
@@ -278,8 +278,7 @@ void ui::paintEvent(QPaintEvent *)
     painter.setBrush(Qt::red);
     QRect rmob;
     for (int i = 0; i < mob.size();i++){
-
-            rmob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(30,30)};
+        rmob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(30,30)};
         painter.drawPixmap(rmob,mob[i].char_frame());
     }
 
@@ -402,6 +401,9 @@ void ui::keyPressEvent(QKeyEvent *event)
                you.move_up();
      }// if up key is pressed
      if(event->key() == key_map["DOWN"]&&(!floor_check(x,y+dis))){
+             if (you.get_timer()->isActive()){
+                 qDebug()<<("active");
+             }
              you.move_down();
 
      }// if down key is pressed
@@ -557,7 +559,6 @@ void ui::mob_action(mobs &mob)
         mob.get_timer()->start(100);
         return;
     }
-
     if (mob.mobpath.isEmpty()){
         return;
     }
@@ -567,7 +568,9 @@ void ui::mob_action(mobs &mob)
     }
     int dis = mob.get_walkstepdis();
 
-    if (mob.mobpath.size() != 0){
+
+
+    if (!mob.mobpath.isEmpty()){
 
         if(mob.x()< mob.mobpath.front().second*30 && !is_object(mob.x()+dis,mob.y()) && !is_mob(mob.x()+dis,mob.y())){
             mob.move_right();
@@ -669,6 +672,9 @@ void ui::reset(){
 }//reset everything
 
 void ui::next_lv(){
+    if (gamemap->level()+1>gamemap->max_level()){
+        qDebug()<<"Final level reached";
+    }
     gamemap->set_level(gamemap->level()+1);
     cur_map = gamemap->get_map(gamemap->level());
     uppath = gamemap->griduppath();

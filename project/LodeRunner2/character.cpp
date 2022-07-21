@@ -47,16 +47,16 @@ void animation::increase_counts()
 
 Character::Character()
 {
+
     size = QSize(20,30);
     step = 10;
     x_cor = 0; y_cor = 0;
     direction = "RIGHT";
     life = 5;
-    set_type("ch");
+
 
     timer = new QTimer();
-    inactive_timer = new QTimer();
-    inactive_timer->setSingleShot(true);
+
 
     ani_right.setname("right");
     ani_right.set_animate(3);
@@ -119,9 +119,7 @@ QTimer* Character::get_timer(){
     return timer;
 }
 
-QTimer* Character::get_inactivetimer(){
-    return inactive_timer;
-}
+
 
 bool Character::on_map(){
     return (row()>0 && col()>0&&row()<1000/size.width() && col()<1000/size.height());

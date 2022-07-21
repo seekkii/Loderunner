@@ -2,6 +2,8 @@
 
 mobs::mobs()
 {
+    inactive_timer = new QTimer();
+    inactive_timer->setSingleShot(true);
     rand_timer = new QTimer();
     hold = false;
     ani_right.set_mob_animate(3);
@@ -9,6 +11,11 @@ mobs::mobs()
     ani_down.set_mob_animate(2);
     ani_up.set_mob_animate(2);
 }
+
+QTimer* mobs::get_inactivetimer(){
+    return inactive_timer;
+}
+
 QTimer* mobs::get_rand_timer(){
     return rand_timer;
 }
@@ -26,25 +33,16 @@ void mobs::set_holding(bool hold)
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //A* Search Algorithm
-// Creating a shortcut for int, int pair type
-
-// Creating a shortcut for pair<int, pair<int, int>> type
-typedef QPair<double, QPair<int, int> > pPair;
 
 
-
-// A Utility Function to check whether given cell (row, col)
-// is a valid cell or not.
+// Check whether given cell (row, col) is a valid cell or not.
 bool pathsearch::isValid(int row, int col)
 {
-    // Returns true if row number and column number
-    // is in range
     return (row >= 0) && (row < ROW) && (col >= 0)
            && (col < COL);
 }
 
-// A Utility Function to check whether the given cell is
-// blocked or not
+// Check whether the given cell is blocked or not
 bool isUnBlocked(QVector<QVector<int>>grid, int row, int col)
 {
     // Returns true if the cell is not blocked else false
@@ -54,8 +52,7 @@ bool isUnBlocked(QVector<QVector<int>>grid, int row, int col)
         return (false);
 }
 
-// A Utility Function to check whether destination cell has
-// been reached or not
+// check whether destination cell has been reached or not
 bool isDestination(int row, int col, QPair<int, int> dest)
 {
     if (row == dest.first && col == dest.second)
@@ -64,7 +61,7 @@ bool isDestination(int row, int col, QPair<int, int> dest)
         return (false);
 }
 
-// A Utility Function to calculate the 'h' heuristics.
+// calculate 'h'
 double calculateHValue(int row, int col, QPair<int, int> dest)
 {
     // Return using the distance formula
@@ -74,8 +71,7 @@ double calculateHValue(int row, int col, QPair<int, int> dest)
 
 }
 
-// A Utility Function to trace the path from the source
-// to destination
+// trace path from source
 void pathsearch::tracePath(QVector<QVector<cell>> cellDetails, QPair<int, int> dest)
 {
     int row = dest.first;
@@ -105,9 +101,7 @@ void pathsearch::tracePath(QVector<QVector<cell>> cellDetails, QPair<int, int> d
     return;
 }
 
-// A Function to find the shortest path between
-// a given source cell to a destination cell according
-// to A* Search Algorithm
+// A* Search Algorithm
 void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPair<int,int> dest)
 {
     // If the source is out of range
@@ -178,9 +172,7 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
     // 'f' as 0
     openList.insert(make_pair(0.0, QPair<int,int>(i, j)));
 
-    // We set this boolean value as false as initially
-    // the destination is not reached.
-    bool foundDest = false;
+
 
     while (!openList.empty()) {
         pPair p = *openList.begin();
@@ -193,31 +185,10 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
         j = p.second.second;
         closedList[i][j] = true;
 
-        /*
-         Generating all the 8 successor of this cell
-
-             N.W   N   N.E
-               \   |   /
-                \  |  /
-             W----Cell----E
-                  / | \
-                /   |  \
-             S.W    S   S.E
-
-         Cell-->Popped Cell (i, j)
-         N -->  North       (i-1, j)
-         S -->  South       (i+1, j)
-         E -->  East        (i, j+1)
-         W -->  West           (i, j-1)
-         N.E--> North-East  (i-1, j+1)
-         N.W--> North-West  (i-1, j-1)
-         S.E--> South-East  (i+1, j+1)
-         S.W--> South-West  (i+1, j-1)*/
-
-        // To store the 'g', 'h' and 'f' of the 8 successors
+        // To store the 'g', 'h' and 'f' of the successors
         double gNew, hNew, fNew;
 
-        //----------- 1st Successor (North) ------------
+        //----------- 1st Successor (Up) ------------
 
         // Only process this cell if this is a valid one
         if (isValid(i - 1, j) == true) {
@@ -229,7 +200,7 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
                 cellDetails[i - 1][j].parent_j = j;
 
                 tracePath(cellDetails, dest);
-                foundDest = true;
+
                 return;
             }
             // If the successor is already on the closed
@@ -265,9 +236,8 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
             }
         }
 
-        //----------- 2nd Successor (South) ------------
+        //----------- 2nd Successor (Down) ------------
 
-        // Only process this cell if this is a valid one
         if (isValid(i + 1, j) == true) {
             // If the destination cell is the same as the
             // current successor
@@ -276,7 +246,6 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
                 cellDetails[i + 1][j].parent_i = i;
                 cellDetails[i + 1][j].parent_j = j;
                 tracePath(cellDetails, dest);
-                foundDest = true;
                 return;
             }
             // If the successor is already on the closed
@@ -311,7 +280,7 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
             }
         }
 
-        //----------- 3rd Successor (East) ------------
+        //----------- 3rd Successor (Right) ------------
 
         // Only process this cell if this is a valid one
         if (isValid(i, j + 1) == true) {
@@ -322,7 +291,6 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
                 cellDetails[i][j + 1].parent_i = i;
                 cellDetails[i][j + 1].parent_j = j;
                 tracePath(cellDetails, dest);
-                foundDest = true;
                 return;
             }
 
@@ -359,9 +327,8 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
             }
         }
 
-        //----------- 4th Successor (West) ------------
+        //----------- 4th Successor (Left) ------------
 
-        // Only process this cell if this is a valid one
         if (isValid(i, j - 1) == true) {
             // If the destination cell is the same as the
             // current successor
@@ -370,28 +337,16 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
                 cellDetails[i][j - 1].parent_i = i;
                 cellDetails[i][j - 1].parent_j = j;
                 tracePath(cellDetails, dest);
-                foundDest = true;
                 return;
             }
 
-            // If the successor is already on the closed
-            // list or if it is blocked, then ignore it.
-            // Else do the following
+
             else if (closedList[i][j - 1] == false
                      && isUnBlocked(grid, i, j - 1)
                             == true) {
                 gNew = cellDetails[i][j].g + 1.0;
                 hNew = calculateHValue(i, j - 1, dest);
                 fNew = gNew + hNew;
-
-                // If it isn’t on the open list, add it to
-                // the open list. Make the current square
-                // the parent of this square. Record the
-                // f, g, and h costs of the square cell
-                //                OR
-                // If it is on the open list already, check
-                // to see if this path to that square is
-                // better, using 'f' cost as the measure.
                 if (cellDetails[i][j - 1].f == FLT_MAX
                     || cellDetails[i][j - 1].f > fNew) {
                     openList.insert(make_pair(
@@ -412,24 +367,11 @@ void pathsearch::aStarSearch(QVector<QVector<int>> grid, QPair<int,int> src, QPa
 
     }
 
-    // When the destination cell is not found and the open
-    // list is empty, then we conclude that we failed to
-    // reach the destination cell. This may happen when the
-    // there is no way to destination cell (due to
-    // blockages)
-
-
     return;
 }
 
 void pathsearch::search(QVector<QVector<int>> grid,QPair<int,int> src, QPair<int,int> dest)
 {
-    /* Description of the Grid-
-     1--> The cell is not blocked
-     0--> The cell is blocked    */
-
-
-    // Source is the left-most bottom-most corner
 
     aStarSearch(grid, src, dest);
 

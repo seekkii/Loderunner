@@ -124,7 +124,7 @@ class map
         QVector<QVector<int>> getdownpath();
 
 
-
+        int max_level() {return 4;};
     private:
 
         QVector<QVector<ground>> current_map;
@@ -133,6 +133,7 @@ class map
         const int block_Width = 30;
 
         int current_lv;
+
 
 
 };// map combines of blocks(grounds)
