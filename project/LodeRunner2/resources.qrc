@@ -12,6 +12,7 @@
         <file>textbar.png</file>
         <file>key_background.jpg</file>
         <file>coins.png</file>
+        <file>bg.png</file>
     </qresource>
     <qresource prefix="/animation">
         <file>animated/left0.png</file>

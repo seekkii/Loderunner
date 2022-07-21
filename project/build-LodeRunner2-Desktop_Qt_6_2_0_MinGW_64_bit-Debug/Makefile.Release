@@ -164,6 +164,7 @@ release/qrc_resources.cpp: ../LodeRunner2/resources.qrc \
 		../LodeRunner2/start_background.jpg \
 		../LodeRunner2/key_background.jpg \
 		../LodeRunner2/background.jpg \
+		../LodeRunner2/bg.png \
 		../LodeRunner2/textbar.png \
 		../LodeRunner2/stairkek.png
 	C:\Qt\6.2.0\mingw81_64\bin\rcc.exe -name resources ..\LodeRunner2\resources.qrc -o release\qrc_resources.cpp

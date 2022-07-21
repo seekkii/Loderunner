@@ -22,7 +22,7 @@ void ui::show_menu(){
       show_losing_menu();
    }
    if (win()){
-       qDebug()<< score;
+
       for (int i = 0 ; i < 10;i++)
           {
               stair stai_r(30*8,30*i);
@@ -61,6 +61,7 @@ void ui::update_score(){
 }// update score board
 
 void ui::setup_initial_pos(){
+    you.get_timer()->start(100);
     //mob
 
     if (gamemap->level() == 1){
@@ -173,12 +174,6 @@ void ui::setup_game()
 
     setup_initial_pos();
     connect(you.get_timer(),  &QTimer::timeout, this, [this]{ fall(you); });
-    for (int i = 0 ; i < mob.size(); i++){
-        connect(mob[i].get_rand_timer(),  &QTimer::timeout, this, [i,this]{ mobs_go_around(mob[i]); });
-        connect(mob[i].get_timer(),  &QTimer::timeout, this, [i,this]{ mobfall(mob[i]); });
-        connect(mob[i].get_inactivetimer(),&QTimer::timeout, this, [i,this]{ inactive(mob[i]); });
-        mob[i].get_rand_timer()->start(100);
-    }//connect mobs timer to fall() slot for fall animation
 
 
 
@@ -238,6 +233,14 @@ void ui::print_map(QPainter &painter)
                      QPixmap pixmap(":/images/fake_ground.png");
                      cur_map[i][j].setpixmap(pixmap);
                 }
+
+                for (int id = 0 ; id < mob.size();id++){
+                    if (mob[id].row()==i && mob[id].col()==j){
+                        QPixmap pixmap(":/images/fake_ground.png");
+                        cur_map[i][j].setpixmap(pixmap);
+                    }
+                }
+
                 painter.drawPixmap(r,cur_map[i][j].getpixmap());
             }
 
@@ -261,7 +264,7 @@ void ui::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     auto back = QRect{QPoint(0,0), QSize(1000,1000)};//rectangle that has center of your char to print pixmap from
-    QPixmap m = QPixmap(":/images/background.jpg");
+    QPixmap m = QPixmap(":/images/bg.png");
     painter.drawPixmap(back,m);
 
     print_map(painter);
@@ -275,12 +278,8 @@ void ui::paintEvent(QPaintEvent *)
     painter.setBrush(Qt::red);
     QRect rmob;
     for (int i = 0; i < mob.size();i++){
-        if (mob[i].getdirection() == "UP" || mob[i].getdirection() == "DOWN"){
-            rmob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(34,33)};
-        }
-        else{
+
             rmob = QRect{QPoint(mob[i].x(),mob[i].y()), QSize(30,30)};
-        }
         painter.drawPixmap(rmob,mob[i].char_frame());
     }
 
@@ -633,7 +632,11 @@ void ui::show_losing_menu(){
 }
 
 bool ui::win(){
-    if (score == 500*(gamemap->level()+2)){
+    int total = 0;
+    for (int i = 1 ; i <=gamemap->level(); i++){
+        total +=500*(i+2);
+    }
+    if (score >= total){
         return true;
     }
     else {
@@ -656,9 +659,6 @@ void ui::show_win_menu()
 
 void ui::reset(){
     lose_menu->close();
-    you.update_life();
-    you.get_timer()->start();
-
     setup_initial_pos();
     cur_map = gamemap->get_map(gamemap->level());
     for (int i = 0 ; i < mob.size(); i++){

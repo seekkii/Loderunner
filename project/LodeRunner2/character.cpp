@@ -69,7 +69,7 @@ Character::Character()
 }
 
 void Character::update_life(){
-    life--;
+    life-=1;
 }
 int Character::get_life(){
     return life;
